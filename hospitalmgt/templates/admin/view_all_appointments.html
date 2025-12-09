@@ -1,0 +1,147 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-user-md me-2"></i>All Doctor Appointments</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Doctor Filter -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <label class="input-group-text" for="doctorFilter">
+                                    <i class="fas fa-filter me-2"></i>Show appointments for:
+                                </label>
+                                <select class="form-select" id="doctorFilter">
+                                    <option value="">All Doctors</option>
+                                    {% for doctor in doctors %}
+                                        <option value="{{ doctor.id }}" {% if selected_doctor_id == doctor.id|stringformat:"s" %}selected{% endif %}>
+                                            Dr. {{ doctor.get_full_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            {% if selected_doctor_id %}
+                                <a href="{% url 'view_all_appointments' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Clear Filter
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Doctor statistics banner when filtered -->
+                    {% if selected_doctor_id and appointments %}
+                        {% with doctor=appointments.0.doctor %}
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-user-md fa-2x me-3"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1">Dr. {{ doctor.get_full_name }}</h5>
+                                    <p class="mb-0">Showing {{ appointments|length }} appointment{{ appointments|length|pluralize }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endif %}
+                    
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover bg-white rounded shadow-sm">
+                            <thead class="table-primary">
+                              <tr>
+                                <th>#</th>
+                                <th>Doctor</th>
+                                <th>Patient</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Reason</th>
+                                <th>Dr Findings</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for appointment in appointments %}
+                              <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                  <div class="fw-bold">Dr. {{ appointment.doctor.get_full_name }}</div>
+                                  <small class="text-muted">{{ appointment.doctor.username }}</small>
+                                </td>
+                                <td>
+                                  <div class="fw-bold">{{ appointment.patient.get_full_name }}</div>
+                                  <small class="text-muted">{{ appointment.patient.username }}</small>
+                                </td>
+                                <td>{{ appointment.appointment_date }}</td>
+                                <td>{{ appointment.appointment_time }}</td>
+                                <td>{{ appointment.reason }}</td>
+                                <td>{{ appointment.doctor_findings|default:"—" }}</td>
+                                <td>
+                                  <span class="badge 
+                                    {% if appointment.status == 'Pending' %} bg-warning text-dark
+                                    {% elif appointment.status == 'Approved' %} bg-success
+                                    {% elif appointment.status == 'Rejected' %} bg-danger
+                                    {% elif appointment.status == 'Consulted' %} bg-primary
+                                    {% else %} bg-secondary {% endif %}">
+                                    {{ appointment.status }}
+                                  </span>
+                                </td>
+                              </tr>
+                              {% empty %}
+                              <tr>
+                                <td colspan="8" class="text-center py-4">
+                                  <h5 class="text-muted">No appointments found.</h5>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% if selected_doctor_id %}
+                            No appointments found for this doctor.
+                        {% else %}
+                            No appointments found.
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const doctorFilter = document.getElementById('doctorFilter');
+        
+        doctorFilter.addEventListener('change', function() {
+            const selectedDoctorId = this.value;
+            let url = new URL(window.location.href);
+            
+            // Clear existing query parameters
+            url.search = '';
+            
+            // Add doctor_id if selected
+            if (selectedDoctorId) {
+                url.searchParams.set('doctor_id', selectedDoctorId);
+            }
+            
+            // Navigate to the URL with the filter
+            window.location.href = url.toString();
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

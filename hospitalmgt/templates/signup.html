@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Signup - Blood Center{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center py-5" style="background-color: #f8f9fa; min-height: 100vh;">
+    <div class="container">
+        <div class="card shadow-lg p-4 mx-auto rounded-3" style="max-width: 800px;">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-primary">Blood Center</h3>
+                <p class="text-muted">Register as Doctor / Donor / Patient</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" id="signupForm">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="role" class="form-label fw-semibold">
+                        <i class="bi bi-person-badge me-2"></i>Select Role
+                    </label>
+                    <select name="role" id="role" class="form-select form-select-lg" required>
+                        <option value="">-- Choose Role --</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="donor">Donor</option>
+                        <option value="patient">Patient</option>
+                    </select>
+                </div>
+                
+                <!-- Blood Group Field - Initially Hidden -->
+                <div class="mb-4" id="bloodGroupContainer" style="display: none;">
+                    <label for="blood_group" class="form-label fw-semibold">
+                        <i class="bi bi-droplet-fill me-2"></i>Blood Group
+                    </label>
+                    <select name="blood_group" id="blood_group" class="form-select form-select-lg">
+                        <option value="">-- Select Blood Group --</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-person-fill me-2"></i>First Name
+                        </label>
+                        <input type="text" name="first_name" id="first_name" class="form-control form-control-lg" placeholder="Enter your first name" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-person-fill me-2"></i>Last Name
+                        </label>
+                        <input type="text" name="last_name" id="last_name" class="form-control form-control-lg" placeholder="Enter your last name" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-person-circle me-2"></i>Username
+                    </label>
+                    <input type="text" name="username" id="username" class="form-control form-control-lg" placeholder="Choose a username" required>
+                    <div class="invalid-feedback" id="usernameFeedback"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-envelope-fill me-2"></i>Email
+                    </label>
+                    <input type="email" name="email" id="email" class="form-control form-control-lg" placeholder="Enter your email address" required pattern=".+\.com$">
+                    <div class="form-text">Your password will be auto-generated and sent to this email</div>
+                    <div class="invalid-feedback" id="emailFeedback"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-telephone-fill me-2"></i>Phone
+                    </label>
+                    <input type="text" name="phone" id="phone" class="form-control form-control-lg" placeholder="Enter your phone number" required pattern="^\d{10}$">
+                    <div class="invalid-feedback" id="phoneFeedback"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-geo-alt-fill me-2"></i>Address
+                    </label>
+                    <textarea name="address" id="address" class="form-control form-control-lg" rows="2" placeholder="Enter your full address" required></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-image-fill me-2"></i>Profile Image
+                    </label>
+                    <input type="file" name="profile_image" class="form-control form-control-lg">
+                </div>
+                
+                <div class="d-grid gap-2 mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                        <i class="bi bi-person-plus-fill me-2"></i>Create Account
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center">
+                <p class="mb-0">Already have an account? <a href="{% url 'login_view' %}" class="text-decoration-none">Login</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Validation Scripts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Blood group field visibility control
+        const roleSelect = document.getElementById("role");
+        const bloodGroupContainer = document.getElementById("bloodGroupContainer");
+        const bloodGroupSelect = document.getElementById("blood_group");
+        
+        roleSelect.addEventListener("change", function() {
+            if (this.value === "donor") {
+                bloodGroupContainer.style.display = "block";
+                bloodGroupSelect.setAttribute("required", "required");
+            } else {
+                bloodGroupContainer.style.display = "none";
+                bloodGroupSelect.removeAttribute("required");
+            }
+        });
+        
+        // Function to check duplicate via AJAX with debounce
+        function createDebouncedValidator(url, field, feedbackElement, debounceTime = 300) {
+            let timeout;
+            
+            return function() {
+                clearTimeout(timeout);
+                
+                timeout = setTimeout(async function() {
+                    try {
+                        const value = field.value.trim();
+                        if (!value) {
+                            feedbackElement.textContent = '';
+                            field.classList.remove('is-invalid', 'is-valid');
+                            return;
+                        }
+                        
+                        // Show loading indicator
+                        field.classList.add('is-loading');
+                        feedbackElement.textContent = 'Checking...';
+                        
+                        const response = await fetch(url + "?value=" + encodeURIComponent(value));
+                        const data = await response.json();
+                        
+                        // Remove loading indicator
+                        field.classList.remove('is-loading');
+                        
+                        if (data.exists) {
+                            feedbackElement.textContent = data.message;
+                            field.classList.add('is-invalid');
+                            field.classList.remove('is-valid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                            field.classList.add('is-valid');
+                            feedbackElement.textContent = '';
+                        }
+                    } catch (error) {
+                        field.classList.remove('is-loading');
+                        console.error("Error checking duplicate:", error);
+                    }
+                }, debounceTime);
+            };
+        }
+    
+        // Add some CSS for the loading state
+        const style = document.createElement('style');
+        style.textContent = `
+            .is-loading {
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="20" height="20"><circle cx="50" cy="50" fill="none" stroke="%236c757d" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138"><animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform></circle></svg>');
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                background-size: 20px 20px;
+            }
+        `;
+        document.head.appendChild(style);
+    
+        // Elements
+        const usernameField = document.getElementById("username");
+        const emailField = document.getElementById("email");
+        const phoneField = document.getElementById("phone");
+    
+        const usernameFeedback = document.getElementById("usernameFeedback");
+        const emailFeedback = document.getElementById("emailFeedback");
+        const phoneFeedback = document.getElementById("phoneFeedback");
+    
+        // Create debounced validator functions
+        const validateUsername = createDebouncedValidator("/validate/username/", usernameField, usernameFeedback);
+        const validateEmail = createDebouncedValidator("/validate/email/", emailField, emailFeedback);
+        const validatePhone = createDebouncedValidator("/validate/phone/", phoneField, phoneFeedback);
+    
+        // Attach input events for real-time validation
+        usernameField.addEventListener("input", validateUsername);
+        emailField.addEventListener("input", validateEmail);
+        phoneField.addEventListener("input", validatePhone);
+    
+        // Keep the blur events for fallback
+        usernameField.addEventListener("blur", validateUsername);
+        emailField.addEventListener("blur", validateEmail);
+        phoneField.addEventListener("blur", validatePhone);
+    
+        // Form submission validation
+        document.getElementById("signupForm").addEventListener("submit", function(event) {
+            // Check if any field has the is-invalid class
+            const hasInvalidFields = document.querySelectorAll('.is-invalid').length > 0;
+            
+            if (hasInvalidFields) {
+                event.preventDefault();
+                alert("Please fix the errors in the form before submitting.");
+            }
+            
+            // Additional validation for donor role requiring blood group
+            if (roleSelect.value === "donor" && !bloodGroupSelect.value) {
+                event.preventDefault();
+                bloodGroupSelect.classList.add('is-invalid');
+                alert("Please select your blood group.");
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Blood Center{% endblock %}
+
+{% block content %}
+{% load static %}   
+<div class="d-flex justify-content-center align-items-center vh-100 mt-5 mt-md-0" style="background-color: #f8f9fa;">
+    <div class="card p-0 shadow-lg rounded-4 overflow-hidden" style="width: 50rem; max-width: 90%;">
+        <div class="d-flex flex-column flex-md-row g-0">
+            <!-- Left: Login Form -->
+            <div class="col-md-6 col-12 p-4 order-2 order-md-1">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold text-primary">Blood Center</h3>
+                    <p class="text-muted">Please login to your account</p>
+                </div>
+                
+                <form method="POST" action="{% url 'login_view' %}">
+                    {% csrf_token %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-person-fill me-2"></i>Username
+                        </label>
+                        <input type="text" class="form-control form-control-lg" name="username" placeholder="Enter your username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-lock-fill me-2"></i>Password
+                        </label>
+                        <input type="password" class="form-control form-control-lg" name="password" placeholder="Enter your password" required>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                        <a href="#" class="float-end text-decoration-none">Forgot password?</a>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                    </div>
+                </form>
+
+                <div class="text-center mb-3">
+                    <p class="text-muted">Or sign in with</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="#" class="btn btn-outline-secondary rounded-circle">
+                            <i class="bi bi-google"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary rounded-circle">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary rounded-circle">
+                            <i class="bi bi-microsoft"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <p class="mb-0">Don't have an account? 
+                        <a href="{% url 'signup' %}" class="text-decoration-none">Register</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right: Image Section -->
+            <div class="col-md-6 col-12 order-1 order-md-2">
+                <img src="{% static 'images/log-blood.webp' %}" alt="Login Illustration" class="img-fluid w-100 h-100" style="object-fit: cover;">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
