@@ -3,19 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Panel{% endblock %}</title>
+    <title>{% block title %}Blood Bank Admin Panel{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        /* Remove default margin and padding from body */
-        body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            transition: background-color 0.3s;
+        :root {
+            --primary-red: #dc3545;
+            --primary-dark: #b02a37;
+            --secondary-red: #c82333;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #2c3e50;
+            --sidebar-bg: #1a1d29;
+            --sidebar-hover: #252936;
+            --gradient-start: #dc3545;
+            --gradient-end: #c82333;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
         }
         
-        /* Wrapper takes full width and height */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-red);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+        
         #wrapper {
             display: flex;
             width: 100%;
@@ -23,66 +60,464 @@
             min-height: 100vh;
         }
         
+        /* Sidebar Styling */
         #sidebar {
-            min-width: 250px;
-            max-width: 250px;
+            min-width: 280px;
+            max-width: 280px;
             height: 100vh;
-            background: #0d6efd;
+            background: var(--sidebar-bg);
             color: #fff;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             position: fixed;
             top: 0;
             left: 0;
             z-index: 999;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
         }
         
         #sidebar.active {
-            margin-left: -250px;
+            margin-left: -280px;
         }
         
         #sidebar .sidebar-header {
-            padding: 20px;
-            background: #0b5ed7;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #sidebar .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        #sidebar .sidebar-header h4 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.4rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        #sidebar .sidebar-header small {
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+            font-size: 0.85rem;
         }
         
         #sidebar ul.components {
-            padding: 20px 0;
+            padding: 15px 0;
         }
         
-        #sidebar ul p {
-            color: #fff;
-            padding: 10px;
+        #sidebar ul li {
+            margin: 5px 0;
+            list-style: none;
+            transition: all 0.3s ease;
         }
         
         #sidebar ul li a {
-            padding: 10px 15px;
-            display: block;
-            color: #fff;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            color: #b8bdc7;
             text-decoration: none;
-            border-left: 3px solid transparent;
+            border-left: 4px solid transparent;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #sidebar ul li a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            transition: width 0.3s ease;
+            z-index: -1;
         }
         
         #sidebar ul li a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-left: 3px solid #fff;
+            background: var(--sidebar-hover);
+            border-left: 4px solid var(--primary-red);
+            color: #fff;
+            padding-left: 30px;
+        }
+        
+        #sidebar ul li a:hover::before {
+            width: 100%;
+        }
+        
+        #sidebar ul li a i {
+            width: 25px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        #sidebar ul li a:hover i {
+            transform: scale(1.2) rotate(5deg);
         }
         
         #sidebar ul li.active > a {
-            background: rgba(255, 255, 255, 0.3);
-            border-left: 3px solid #fff;
+            background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            border-left: 4px solid #fff;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
         }
         
+        /* Content Area */
         #content {
             width: 100%;
             min-height: 100vh;
-            transition: all 0.3s;
-            margin-left: 250px;
+            transition: all 0.4s ease;
+            margin-left: 280px;
         }
         
         #content.active {
             margin-left: 0;
         }
         
+        /* Top Navbar */
+        .navbar {
+            padding: 1rem 2rem;
+            background: #fff;
+            border: none;
+            margin-bottom: 0;
+            width: 100%;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--dark-gray) !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .navbar-brand i {
+            color: var(--primary-red);
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+        }
+        
+        #sidebarCollapse {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            font-size: 1.3rem;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+            display: none;
+        }
+        
+        #sidebarCollapse:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        /* Content Container */
+        .content-container {
+            padding: 35px;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Welcome Header */
+        .welcome-header {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 35px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .welcome-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .welcome-header p {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Statistics Cards */
+        .stat-card {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .stat-card:hover .stat-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+        
+        .stat-icon::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            background: inherit;
+            opacity: 0.3;
+            filter: blur(15px);
+        }
+        
+        .stat-icon.bg-red {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+        
+        .stat-icon.bg-blue {
+            background: linear-gradient(135deg, #4e73df, #224abe);
+            color: white;
+        }
+        
+        .stat-icon.bg-green {
+            background: linear-gradient(135deg, #1cc88a, #13855c);
+            color: white;
+        }
+        
+        .stat-icon.bg-orange {
+            background: linear-gradient(135deg, #f6c23e, #dda20a);
+            color: white;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #6c757d;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+        
+        .stat-card .badge {
+            margin-top: 10px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Action Cards */
+        .action-card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s ease;
+            border: none;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(220, 53, 69, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(50%, 50%);
+            transition: all 0.4s ease;
+        }
+        
+        .action-card:hover::after {
+            transform: translate(30%, 30%);
+            background: radial-gradient(circle, rgba(220, 53, 69, 0.15) 0%, transparent 70%);
+        }
+        
+        .action-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .action-card h5 {
+            color: var(--dark-gray);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .action-card p {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .action-card .btn {
+            border-radius: 10px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .action-card .btn-outline-danger {
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+        }
+        
+        .action-card .btn-outline-danger:hover {
+            background: var(--primary-red);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .action-card .btn-outline-primary:hover {
+            transform: scale(1.05);
+        }
+        
+        .action-card .btn-outline-dark:hover {
+            transform: scale(1.05);
+        }
+        
+        /* User Badge */
+        .user-badge {
+            background: var(--light-gray);
+            padding: 8px 18px;
+            border-radius: 25px;
+            color: var(--dark-gray);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .user-badge:hover {
+            background: var(--medium-gray);
+            transform: scale(1.05);
+        }
+        
+        .user-badge i {
+            color: var(--primary-red);
+        }
+        
+        /* Logout Button */
+        .btn-logout {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        /* Overlay */
         .overlay {
             display: none;
             position: fixed;
@@ -94,6 +529,7 @@
             transition: all 0.5s ease-in-out;
             top: 0;
             left: 0;
+            backdrop-filter: blur(5px);
         }
         
         .overlay.active {
@@ -102,79 +538,97 @@
         }
         
         #dismiss {
-            width: 35px;
-            height: 35px;
-            line-height: 35px;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
             text-align: center;
-            background: #0b5ed7;
+            background: var(--primary-red);
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             cursor: pointer;
             border-radius: 50%;
             display: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
         }
         
-        /* Top navbar with no gaps */
-        .navbar {
-            padding: 0.75rem 1rem;
-            background: #0d6efd;
-            border: none;
-            border-radius: 0;
-            margin-bottom: 0;
-            width: 100%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        #dismiss:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: var(--primary-dark);
         }
         
-        .navbar-brand {
-            font-weight: 700;
-        }
-        
-        #sidebarCollapse {
-            background: transparent;
-            color: white;
-            border: none;
-            font-size: 1.5rem;
-            display: none; /* Hide by default on desktop */
-        }
-        
-        .content-container {
-            padding: 20px;
-        }
-        
-        /* Card transitions */
-        .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
-        }
-        
+        /* Responsive Design */
         @media (max-width: 768px) {
             #sidebar {
-                margin-left: -250px;
+                margin-left: -280px;
             }
+            
             #sidebar.active {
                 margin-left: 0;
             }
+            
             #content {
                 margin-left: 0;
             }
+            
             #content.active {
                 margin-left: 0;
             }
+            
             #dismiss {
                 display: block;
             }
+            
             #sidebarCollapse {
-                display: block; /* Show on small screens */
+                display: block;
             }
-            #sidebarCollapse span {
+            
+            .content-container {
+                padding: 20px;
+            }
+            
+            .welcome-header {
+                padding: 25px;
+            }
+            
+            .welcome-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            
+            .user-badge {
                 display: none;
             }
         }
+        
+        /* Loading Animation */
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .stat-card, .action-card {
+            animation: slideInFromLeft 0.6s ease forwards;
+        }
+        
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        .action-card:nth-child(1) { animation-delay: 0.2s; }
+        .action-card:nth-child(2) { animation-delay: 0.3s; }
+        .action-card:nth-child(3) { animation-delay: 0.4s; }
     </style>
 </head>
 <body>
@@ -182,70 +636,79 @@
         <!-- Sidebar -->
         <nav id="sidebar">
             <div id="dismiss">
-                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-times"></i>
             </div>
             
             <div class="sidebar-header">
-                <h5>Blood Center Admin</h5>
+                <h4><i class="fas fa-heartbeat me-2"></i>Blood Bank Admin</h4>
+                <small>Management System</small>
             </div>
             
             <ul class="list-unstyled components">
                 <li class="active">
                     <a href="{% url 'admin_dashboard' %}">
-                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'pending_approvals' %}">
-                        <i class="fas fa-clock me-2"></i> Pending Approvals
+                        <i class="fas fa-clock"></i>
+                        <span>Pending Approvals</span>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'doctor_list' %}">
-                        <i class="fas fa-user-md me-2"></i> Manage Doctors
+                        <i class="fas fa-user-md"></i>
+                        <span>Manage Doctors</span>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'donor_list' %}">
-                        <i class="fas fa-hand-holding-heart me-2"></i> Manage Donors
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>Manage Donors</span>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'admin_patient_list' %}">
-                        <i class="fas fa-procedures me-2"></i> Manage Patients
+                        <i class="fas fa-procedures"></i>
+                        <span>Manage Patients</span>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'view_all_appointments' %}">
-                        <i class="fas fa-calendar-check me-2"></i> View Appointments
+                        <i class="fas fa-calendar-check"></i>
+                        <span>View Appointments</span>
                     </a>
                 </li>
-                
                 <li>
                     <a href="{% url 'view_blood_requests' %}">
-                        <i class="fas fa-tint me-2"></i> Blood Requests
+                        <i class="fas fa-tint"></i>
+                        <span>Blood Requests</span>
                     </a>
                 </li>
-                
                 <li>
                     <a href="{% url 'admin_chat_view' %}">
-                        <i class="fas fa-comments me-2"></i> Chat with Donors
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="#">
-                        <i class="fas fa-chart-line me-2"></i> Reports
+                        <i class="fas fa-comments"></i>
+                        <span>Chat with Donors</span>
                     </a>
                 </li>
                 <li>
                     <a href="#">
-                        <i class="fas fa-cogs me-2"></i> Settings
+                        <i class="fas fa-chart-line"></i>
+                        <span>Reports & Analytics</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-cog"></i>
+                        <span>System Settings</span>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'logout_view' %}">
-                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
                     </a>
                 </li>
             </ul>
@@ -253,16 +716,24 @@
 
         <!-- Page Content -->
         <div id="content">
-            <!-- Navbar - Removed all margins and padding from top -->
-            <nav class="navbar navbar-expand-lg navbar-dark">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg">
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse" class="btn">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <a class="navbar-brand ms-3" href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
-                    <div class="ms-auto d-flex align-items-center">
-                        <span class="text-white me-3 d-none d-md-block">Welcome, {{ request.user.username }}</span>
-                        <a href="{% url 'logout_view' %}" class="btn btn-outline-light btn-sm">Logout</a>
+                    <a class="navbar-brand ms-3" href="{% url 'admin_dashboard' %}">
+                        <i class="fas fa-heartbeat"></i>
+                        Admin Dashboard
+                    </a>
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <span class="user-badge d-none d-md-flex">
+                            <i class="fas fa-user-shield"></i>
+                            {{ request.user.username }}
+                        </span>
+                        <a href="{% url 'logout_view' %}" class="btn btn-logout text-white">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
                     </div>
                 </div>
             </nav>
@@ -270,104 +741,97 @@
             <!-- Main Content -->
             <div class="content-container">
                 {% block content %}
-                <!-- Admin dashboard content from your first document will go here -->
-                <h2 class="mb-4 fw-bold text-primary">Welcome, Admin {{ request.user.username }}</h2>
-                <p class="text-muted">Manage users, doctors, donors, patients, reports, and system settings all in one place.</p>
+                <!-- Welcome Header -->
+                <div class="welcome-header">
+                    <h2><i class="fas fa-hand-sparkles me-2"></i>Welcome Back, Admin {{ request.user.username }}!</h2>
+                    <p>Manage the blood bank system efficiently. Monitor donors, patients, requests, and more from your centralized dashboard.</p>
+                </div>
 
-                <div class="row g-4 mt-3">
-                    <!-- Users Card -->
+                <!-- Statistics Cards Row -->
+                <div class="row g-4 mb-4">
                     <div class="col-md-6 col-lg-3">
-                        <div class="card text-white bg-primary shadow rounded-4 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="me-3">
-                                    <i class="fas fa-users fa-2x"></i>
-                                </div>
-                                <div>
-                                    <h5 class="card-title mb-0">Manage Users</h5>
-                                    <small class="text-white-50">Add, edit, remove users</small>
-                                </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-red">
+                                <i class="fas fa-hand-holding-heart"></i>
                             </div>
+                            <h3 class="mb-1">245</h3>
+                            <p class="text-muted">Active Donors</p>
+                            <span class="badge bg-success"><i class="fas fa-arrow-up me-1"></i>12% increase</span>
                         </div>
                     </div>
 
-                    <!-- Doctors Card -->
                     <div class="col-md-6 col-lg-3">
-                        <div class="card text-white bg-success shadow rounded-4 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="me-3">
-                                    <i class="fas fa-user-md fa-2x"></i>
-                                </div>
-                                <div>
-                                    <h5 class="card-title mb-0">Doctors</h5>
-                                    <small class="text-white-50">View & manage doctors</small>
-                                </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-blue">
+                                <i class="fas fa-user-md"></i>
                             </div>
+                            <h3 class="mb-1">48</h3>
+                            <p class="text-muted">Total Doctors</p>
+                            <span class="badge bg-info"><i class="fas fa-check me-1"></i>All Active</span>
                         </div>
                     </div>
 
-                    <!-- Donors Card -->
                     <div class="col-md-6 col-lg-3">
-                        <div class="card text-white bg-danger shadow rounded-4 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="me-3">
-                                    <i class="fas fa-hand-holding-heart fa-2x"></i>
-                                </div>
-                                <div>
-                                    <h5 class="card-title mb-0">Donors</h5>
-                                    <small class="text-white-50">Manage donor profiles</small>
-                                </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-green">
+                                <i class="fas fa-procedures"></i>
                             </div>
+                            <h3 class="mb-1">182</h3>
+                            <p class="text-muted">Total Patients</p>
+                            <span class="badge bg-primary"><i class="fas fa-user-plus me-1"></i>5 New</span>
                         </div>
                     </div>
 
-                    <!-- Patients Card -->
                     <div class="col-md-6 col-lg-3">
-                        <div class="card text-white bg-warning shadow rounded-4 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="me-3">
-                                    <i class="fas fa-procedures fa-2x"></i>
-                                </div>
-                                <div>
-                                    <h5 class="card-title mb-0">Patients</h5>
-                                    <small class="text-white-50">Access patient records</small>
-                                </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-orange">
+                                <i class="fas fa-tint"></i>
                             </div>
+                            <h3 class="mb-1">23</h3>
+                            <p class="text-muted">Pending Requests</p>
+                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Urgent</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Second Row -->
-                <div class="row g-4 mt-3">
-                    <!-- Reports Card -->
+                <!-- Action Cards Row -->
+                <div class="row g-4">
                     <div class="col-md-6 col-lg-4">
-                        <div class="card border-0 shadow rounded-4 h-100">
-                            <div class="card-body">
-                                <h5 class="card-title"><i class="fas fa-chart-line me-2 text-primary"></i> Reports</h5>
-                                <p class="card-text">Generate system and health-related reports.</p>
-                                <a href="#" class="btn btn-outline-primary btn-sm">View Reports</a>
-                            </div>
+                        <div class="action-card">
+                            <h5>
+                                <i class="fas fa-chart-line text-primary"></i>
+                                Reports & Analytics
+                            </h5>
+                            <p>Generate comprehensive reports on blood inventory, donation trends, and system performance.</p>
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="fas fa-file-medical-alt me-2"></i>View Reports
+                            </a>
                         </div>
                     </div>
 
-                    <!-- Settings Card -->
                     <div class="col-md-6 col-lg-4">
-                        <div class="card border-0 shadow rounded-4 h-100">
-                            <div class="card-body">
-                                <h5 class="card-title"><i class="fas fa-cogs me-2 text-dark"></i> Settings</h5>
-                                <p class="card-text">Configure system settings and preferences.</p>
-                                <a href="#" class="btn btn-outline-dark btn-sm">Go to Settings</a>
-                            </div>
+                        <div class="action-card">
+                            <h5>
+                                <i class="fas fa-cog text-dark"></i>
+                                System Settings
+                            </h5>
+                            <p>Configure system preferences, user permissions, and notification settings for optimal operation.</p>
+                            <a href="#" class="btn btn-outline-dark">
+                                <i class="fas fa-sliders-h me-2"></i>Configure
+                            </a>
                         </div>
                     </div>
 
-                    <!-- Notifications -->
                     <div class="col-md-6 col-lg-4">
-                        <div class="card border-0 shadow rounded-4 h-100">
-                            <div class="card-body">
-                                <h5 class="card-title"><i class="fas fa-bell me-2 text-danger"></i> Notifications</h5>
-                                <p class="card-text">Check pending approvals and messages.</p>
-                                <a href="#" class="btn btn-outline-danger btn-sm">View Alerts</a>
-                            </div>
+                        <div class="action-card">
+                            <h5>
+                                <i class="fas fa-bell text-danger"></i>
+                                Notifications Center
+                            </h5>
+                            <p>View pending approvals, urgent blood requests, and important system alerts requiring attention.</p>
+                            <a href="#" class="btn btn-outline-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i>View Alerts
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -383,7 +847,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Sidebar toggle for mobile and desktop
+            // Sidebar toggle functionality
             $('#dismiss, .overlay').on('click', function () {
                 $('#sidebar').removeClass('active');
                 $('#content').removeClass('active');
@@ -394,17 +858,15 @@
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
                 $('.overlay').toggleClass('active');
-                $('.collapse.in').toggleClass('in');
-                $('a[aria-expanded=true]').attr('aria-expanded', 'false');
             });
             
-            // Enable tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            // Initialize Bootstrap tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
             
-            // Add active class to current page
+            // Active page highlighting
             var path = window.location.pathname;
             $("#sidebar ul li a").each(function() {
                 var href = $(this).attr('href');
@@ -412,6 +874,39 @@
                     $(this).parent().addClass('active');
                     $(this).parent().siblings().removeClass('active');
                 }
+            });
+            
+            // Add smooth scroll behavior
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Counter animation for statistics
+            $('.stat-card h3').each(function() {
+                const $this = $(this);
+                const countTo = parseInt($this.text());
+                
+                $({ countNum: 0 }).animate({
+                    countNum: countTo
+                }, {
+                    duration: 2000,
+                    easing: 'swing',
+                    step: function() {
+                        $this.text(Math.floor(this.countNum));
+                    },
+                    complete: function() {
+                        $this.text(this.countNum);
+                    }
+                });
             });
         });
     </script>

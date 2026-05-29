@@ -97,276 +97,456 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-10">
-      <div class="card shadow">
-        <div class="card-header bg-info text-white">
-          <h4 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Your Appointments</h4>
-        </div>
-        <div class="card-body">
-          {% if appointments %}
-          <div class="table-responsive">
-            <table class="table table-hover bg-white rounded shadow-sm">
-              <thead class="table-primary">
-                <tr>
-                  <th>#</th>
-                  <th>Patient</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Reason</th>
-                  <th>Status</th>
-                  <th>Consult</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for appointment in appointments %}
-                <tr>
-                  <td>{{ forloop.counter }}</td>
-                  <td>
-                    <div class="fw-bold">{{ appointment.patient.get_full_name }}</div>
-                    <small class="text-muted">{{ appointment.patient.username }}</small>
-                  </td>
-                  <td>{{ appointment.appointment_date }}</td>
-                  <td>{{ appointment.appointment_time }}</td>
-                  <td>{{ appointment.reason }}</td>
-                  <td>
-                    <span class="badge 
-                      {% if appointment.status == 'Pending' %}
-                        bg-warning text-dark
-                      {% elif appointment.status == 'Approved' %}
-                        bg-success
-                      {% elif appointment.status == 'Rejected' %}
-                        bg-danger
-                      {% elif appointment.status == 'Consulted' %}
-                        bg-primary
-                      {% else %}
-                        bg-secondary
-                      {% endif %}">
-                      {{ appointment.status }}
-                    </span>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#consultModal{{ appointment.id }}">
-                      Consult
-                    </button>
 
-                    <!-- Consult Modal -->
-                    <div class="modal fade" id="consultModal{{ appointment.id }}" tabindex="-1" aria-labelledby="consultModalLabel{{ appointment.id }}" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                          <form method="post" action="{% url 'consult_appointment' appointment.id %}">
-                            {% csrf_token %}
-                            <div class="modal-header bg-info text-white">
-                              <h5 class="modal-title" id="consultModalLabel{{ appointment.id }}">
-                                <i class="fas fa-stethoscope me-2"></i>Consult Patient
-                              </h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                              <div class="mb-3">
-                                <label for="consultReason{{ appointment.id }}" class="form-label">Consultation Notes</label>
-                                <textarea class="form-control" name="consult_reason" id="consultReason{{ appointment.id }}" rows="4" required></textarea>
-                              </div>
-                            </div>
-                            <div class="modal-footer">
-                              <button type="submit" class="btn btn-primary">Submit</button>
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="7" class="text-center py-4">
-                    <div class="d-flex flex-column align-items-center">
-                      <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
-                      <h5>No appointments found</h5>
-                      <p class="text-muted">Try adjusting your filters or date range.</p>
-                    </div>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% else %}
-          <p class="text-center text-muted">You have no appointment requests yet.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<style>
+    .appointment-wrapper{
+        padding: 35px 10px;
+    }
 
+    .appointment-card{
+        border: none;
+        border-radius: 22px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 10px 35px rgba(220, 53, 69, 0.12);
+    }
 
+    .appointment-header{
+        background: linear-gradient(135deg,#dc3545,#b02a37);
+        padding: 22px 28px;
+    }
 
+    .appointment-header h4{
+        font-weight: 700;
+        margin: 0;
+        color: #fff;
+        letter-spacing: .3px;
+    }
 
+    .appointment-table{
+        margin-bottom: 0;
+    }
 
+    .appointment-table thead{
+        background: #fff5f5;
+    }
 
+    .appointment-table thead th{
+        border: none;
+        padding: 18px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #dc3545;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
 
+    .appointment-table tbody tr{
+        transition: 0.25s ease;
+        border-bottom: 1px solid #f1f1f1;
+    }
 
+    .appointment-table tbody tr:hover{
+        background: #fff8f8;
+        transform: scale(1.002);
+    }
 
+    .appointment-table tbody td{
+        vertical-align: middle;
+        padding: 18px 16px;
+        border: none;
+        font-size: 15px;
+    }
 
+    .patient-box{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-<!-- Change Password Modal -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="post" action="{% url 'change_password' %}">
-      {% csrf_token %}
-      <div class="modal-content">
-        <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="old_password" class="form-label">Current Password</label>
-            <input type="password" class="form-control" name="old_password" id="old_password" required>
-          </div>
-          <div class="mb-3">
-            <label for="new_password" class="form-label">New Password</label>
-            <input type="password" class="form-control" name="new_password" id="new_password" required>
-            <!-- Real-time validation feedback will be inserted here by JavaScript -->
-          </div>
-          <div class="mb-3">
-            <label for="confirm_password" class="form-label">Confirm New Password</label>
-            <input type="password" class="form-control" name="confirm_password" id="confirm_password" required>
-            <!-- Match feedback will be inserted here by JavaScript -->
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger">Change Password</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const newPasswordInput = document.getElementById('new_password');
-    const confirmPasswordInput = document.getElementById('confirm_password');
-    const form = document.querySelector('#changePasswordModal form');
-    
-    // Create validation feedback container
-    const validationFeedback = document.createElement('div');
-    validationFeedback.className = 'password-validation-feedback mt-2';
-    newPasswordInput.parentNode.appendChild(validationFeedback);
-    
-    // Create validation criteria elements
-    const criteria = [
-      { id: 'length', text: 'At least 8 characters', regex: /.{8,}/ },
-      { id: 'uppercase', text: 'At least one uppercase letter', regex: /[A-Z]/ },
-      { id: 'lowercase', text: 'At least one lowercase letter', regex: /[a-z]/ },
-      { id: 'number', text: 'At least one number', regex: /[0-9]/ },
-      { id: 'special', text: 'At least one special character', regex: /[!@#$%^&*(),.?":{}|<>]/ }
-    ];
-    
-    // Create validation feedback UI
-    validationFeedback.innerHTML = '<div class="small">Password requirements:</div>';
-    const criteriaList = document.createElement('ul');
-    criteriaList.className = 'list-unstyled small ms-3';
-    
-    criteria.forEach(criterion => {
-      const item = document.createElement('li');
-      item.id = `criterion-${criterion.id}`;
-      item.innerHTML = `<i class="bi bi-x-circle text-danger"></i> ${criterion.text}`;
-      criteriaList.appendChild(item);
-    });
-    
-    validationFeedback.appendChild(criteriaList);
-    
-    // Match confirmation feedback
-    const matchFeedback = document.createElement('div');
-    matchFeedback.className = 'match-feedback small mt-2 d-none';
-    matchFeedback.innerHTML = '<i class="bi bi-x-circle text-danger"></i> Passwords do not match';
-    confirmPasswordInput.parentNode.appendChild(matchFeedback);
-    
-    // Real-time validation as user types
-    newPasswordInput.addEventListener('input', function() {
-      validatePassword();
-    });
-    
-    // Check if passwords match in real-time
-    confirmPasswordInput.addEventListener('input', function() {
-      validatePasswordMatch();
-    });
-    
-    newPasswordInput.addEventListener('input', function() {
-      if (confirmPasswordInput.value !== '') {
-        validatePasswordMatch();
-      }
-    });
-    
-    // Form submission validation
-    form.addEventListener('submit', function(event) {
-      const isValid = validatePassword();
-      const passwordsMatch = validatePasswordMatch();
-      
-      if (!isValid || !passwordsMatch) {
-        event.preventDefault();
-      }
-    });
-  
-    function validatePassword() {
-      const password = newPasswordInput.value;
-      let allValid = true;
-      
-      // Check each criterion
-      criteria.forEach(criterion => {
-        const criterionElement = document.getElementById(`criterion-${criterion.id}`);
-        const isValid = criterion.regex.test(password);
-        
-        if (isValid) {
-          criterionElement.innerHTML = `<i class="bi bi-check-circle text-success"></i> ${criterion.text}`;
-        } else {
-          criterionElement.innerHTML = `<i class="bi bi-x-circle text-danger"></i> ${criterion.text}`;
-          allValid = false;
+    .patient-avatar{
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .patient-name{
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 2px;
+    }
+
+    .patient-username{
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    .custom-badge{
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    .consult-btn{
+        border-radius: 12px;
+        padding: 8px 18px;
+        font-weight: 600;
+        border: none;
+        background: linear-gradient(135deg,#dc3545,#b02a37);
+        color: white;
+        transition: .3s ease;
+    }
+
+    .consult-btn:hover{
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(220,53,69,0.25);
+    }
+
+    .empty-state{
+        padding: 70px 20px;
+    }
+
+    .empty-state i{
+        font-size: 70px;
+        color: #dc3545;
+        opacity: .5;
+    }
+
+    .table-responsive{
+        border-radius: 0 0 22px 22px;
+    }
+
+    .modal-content{
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .modal-header{
+        border: none;
+    }
+
+    .modal-footer{
+        border: none;
+    }
+
+    .form-control{
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: none !important;
+    }
+
+    .form-control:focus{
+        border-color: #dc3545;
+    }
+
+    @media(max-width:768px){
+
+        .appointment-table thead{
+            display: none;
         }
-      });
-      
-      // Update input visual state
-      if (allValid) {
-        newPasswordInput.classList.remove('is-invalid');
-        newPasswordInput.classList.add('is-valid');
-      } else {
-        newPasswordInput.classList.remove('is-valid');
-        newPasswordInput.classList.add('is-invalid');
-      }
-      
-      return allValid;
+
+        .appointment-table,
+        .appointment-table tbody,
+        .appointment-table tr,
+        .appointment-table td{
+            display: block;
+            width: 100%;
+        }
+
+        .appointment-table tr{
+            margin-bottom: 15px;
+            border-radius: 18px;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+        }
+
+        .appointment-table td{
+            text-align: right;
+            position: relative;
+            padding-left: 50%;
+        }
+
+        .appointment-table td::before{
+            position: absolute;
+            left: 15px;
+            top: 18px;
+            font-weight: 700;
+            color: #dc3545;
+            text-align: left;
+        }
+
+        .appointment-table td:nth-child(1)::before{content:"#";}
+        .appointment-table td:nth-child(2)::before{content:"Patient";}
+        .appointment-table td:nth-child(3)::before{content:"Date";}
+        .appointment-table td:nth-child(4)::before{content:"Time";}
+        .appointment-table td:nth-child(5)::before{content:"Reason";}
+        .appointment-table td:nth-child(6)::before{content:"Status";}
+        .appointment-table td:nth-child(7)::before{content:"Consult";}
     }
-    
-    function validatePasswordMatch() {
-      const match = newPasswordInput.value === confirmPasswordInput.value;
-      
-      if (confirmPasswordInput.value === '') {
-        matchFeedback.classList.add('d-none');
-        confirmPasswordInput.classList.remove('is-valid');
-        confirmPasswordInput.classList.remove('is-invalid');
-        return false;
-      }
-      
-      matchFeedback.classList.remove('d-none');
-      
-      if (match) {
-        matchFeedback.innerHTML = '<i class="bi bi-check-circle text-success"></i> Passwords match';
-        confirmPasswordInput.classList.remove('is-invalid');
-        confirmPasswordInput.classList.add('is-valid');
-      } else {
-        matchFeedback.innerHTML = '<i class="bi bi-x-circle text-danger"></i> Passwords do not match';
-        confirmPasswordInput.classList.remove('is-valid');
-        confirmPasswordInput.classList.add('is-invalid');
-      }
-      
-      return match;
-    }
-  });
-</script>
-<!-- Make sure to include Bootstrap Icons in your page -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</style>
+
+<div class="container-fluid appointment-wrapper">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-11">
+
+            <div class="appointment-card">
+
+                <div class="appointment-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <h4>
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Your Appointments
+                    </h4>
+
+                    <div class="text-white small">
+                        Total Appointments :
+                        <strong>{{ appointments|length }}</strong>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+
+                    {% if appointments %}
+
+                    <div class="table-responsive">
+
+                        <table class="table appointment-table align-middle">
+
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Consult</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for appointment in appointments %}
+
+                                <tr>
+
+                                    <td>
+                                        <strong>{{ forloop.counter }}</strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="patient-box">
+
+                                            <div class="patient-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+
+                                            <div>
+                                                <div class="patient-name">
+                                                    {{ appointment.patient.get_full_name }}
+                                                </div>
+
+                                                <div class="patient-username">
+                                                    @{{ appointment.patient.username }}
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <strong>{{ appointment.appointment_date }}</strong>
+                                    </td>
+
+                                    <td>
+                                        {{ appointment.appointment_time }}
+                                    </td>
+
+                                    <td style="max-width:250px;">
+                                        <div class="text-muted">
+                                            {{ appointment.reason }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+
+                                        <span class="custom-badge
+
+                                        {% if appointment.status == 'Pending' %}
+                                            bg-warning text-dark
+                                        {% elif appointment.status == 'Approved' %}
+                                            bg-success text-white
+                                        {% elif appointment.status == 'Rejected' %}
+                                            bg-danger text-white
+                                        {% elif appointment.status == 'Consulted' %}
+                                            bg-primary text-white
+                                        {% else %}
+                                            bg-secondary text-white
+                                        {% endif %}
+
+                                        ">
+
+                                            {{ appointment.status }}
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <button
+                                            type="button"
+                                            class="consult-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#consultModal{{ appointment.id }}"
+                                        >
+                                            <i class="fas fa-stethoscope me-1"></i>
+                                            Consult
+                                        </button>
+
+                                        <!-- Consult Modal -->
+
+                                        <div class="modal fade"
+                                             id="consultModal{{ appointment.id }}"
+                                             tabindex="-1"
+                                             aria-hidden="true">
+
+                                            <div class="modal-dialog modal-dialog-centered">
+
+                                                <div class="modal-content">
+
+                                                    <form method="post"
+                                                          action="{% url 'consult_appointment' appointment.id %}">
+
+                                                        {% csrf_token %}
+
+                                                        <div class="modal-header bg-danger text-white">
+
+                                                            <h5 class="modal-title">
+                                                                <i class="fas fa-notes-medical me-2"></i>
+                                                                Consultation Notes
+                                                            </h5>
+
+                                                            <button type="button"
+                                                                    class="btn-close btn-close-white"
+                                                                    data-bs-dismiss="modal">
+                                                            </button>
+
+                                                        </div>
+
+                                                        <div class="modal-body p-4">
+
+                                                            <div class="mb-3">
+
+                                                                <label class="form-label fw-semibold">
+                                                                    Patient Notes
+                                                                </label>
+
+                                                                <textarea
+                                                                    class="form-control"
+                                                                    name="consult_reason"
+                                                                    rows="5"
+                                                                    placeholder="Write consultation notes here..."
+                                                                    required></textarea>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                        <div class="modal-footer px-4 pb-4">
+
+                                                            <button type="button"
+                                                                    class="btn btn-light border"
+                                                                    data-bs-dismiss="modal">
+                                                                Close
+                                                            </button>
+
+                                                            <button type="submit"
+                                                                    class="btn btn-danger px-4">
+                                                                Submit
+                                                            </button>
+
+                                                        </div>
+
+                                                    </form>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                                {% empty %}
+
+                                <tr>
+                                    <td colspan="7">
+
+                                        <div class="empty-state text-center">
+
+                                            <i class="fas fa-calendar-times mb-3"></i>
+
+                                            <h4 class="fw-bold">
+                                                No Appointments Found
+                                            </h4>
+
+                                            <p class="text-muted mb-0">
+                                                There are currently no appointments available.
+                                            </p>
+
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="empty-state text-center">
+
+                        <i class="fas fa-calendar-times mb-3"></i>
+
+                        <h4 class="fw-bold">
+                            No Appointment Requests Yet
+                        </h4>
+
+                        <p class="text-muted">
+                            Appointment requests will appear here once patients book appointments.
+                        </p>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 {% endblock %}

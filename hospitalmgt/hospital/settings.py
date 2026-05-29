@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'landingpgs',
         'USER':'root',
-        'PASSWORD':'',
+        'PASSWORD':'root123',
         'HOST':'localhost',
         'PORT':'3306',
           'OPTIONS': {
@@ -146,5 +146,5 @@ EMAIL_HOST = 'smtp.gmail.com'  # Use your email provider
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'subinsuresh8088@gmail.com'
-EMAIL_HOST_PASSWORD = 'izmv rdww zahc ifbw'  # Use app password for security
+EMAIL_HOST_PASSWORD = 'mjbb xweo yzlz xtbh'  # Use app password for security
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

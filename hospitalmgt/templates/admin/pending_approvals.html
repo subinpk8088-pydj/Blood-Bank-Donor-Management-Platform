@@ -3,22 +3,238 @@
 {% block title %}Pending Approvals{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Pending Approvals</h2>
-
-{% if messages %}
-    <div id="msg-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
-        {% for message in messages %}
-            <div class="alert alert-success alert-dismissible fade show animate-slide-in shadow" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
+    body{
+        background: #f4f7fb;
+    }
+
+    .page-header{
+        background: linear-gradient(135deg,#dc3545,#b91c1c);
+        border-radius: 28px;
+        padding: 35px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(220,53,69,0.18);
+    }
+
+    .page-header::before{
+        content: '';
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 50%;
+        top: -100px;
+        right: -80px;
+    }
+
+    .page-header::after{
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+        bottom: -80px;
+        left: -60px;
+    }
+
+    .page-header h2{
+        color: white;
+        font-weight: 800;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-header p{
+        color: rgba(255,255,255,0.85);
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .approval-card{
+        background: white;
+        border-radius: 28px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.06);
+        border: 1px solid #eef1f6;
+    }
+
+    .table{
+        margin-bottom: 0;
+    }
+
+    .table thead th{
+        background: #f8fafc !important;
+        border: none;
+        color: #344054;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 18px 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr{
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover{
+        background: #fff5f5;
+        transform: scale(1.003);
+    }
+
+    .table tbody td{
+        padding: 20px;
+        vertical-align: middle;
+        border: none;
+        font-weight: 500;
+        color: #475467;
+    }
+
+    .user-box{
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .user-avatar{
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        box-shadow: 0 8px 20px rgba(220,53,69,0.2);
+    }
+
+    .role-badge{
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: capitalize;
+        display: inline-block;
+    }
+
+    .role-doctor{
+        background: rgba(59,130,246,0.12);
+        color: #2563eb;
+    }
+
+    .role-donor{
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+    }
+
+    .role-patient{
+        background: rgba(34,197,94,0.12);
+        color: #16a34a;
+    }
+
+    .approve-btn{
+        border: none;
+        background: linear-gradient(135deg,#16a34a,#22c55e);
+        color: white;
+        padding: 10px 22px;
+        border-radius: 14px;
+        font-weight: 700;
+        transition: 0.3s ease;
+        box-shadow: 0 8px 18px rgba(34,197,94,0.2);
+    }
+
+    .approve-btn:hover{
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(34,197,94,0.3);
+        color: white;
+    }
+
+    .empty-state{
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .empty-state i{
+        font-size: 70px;
+        color: #d0d5dd;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h4{
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .empty-state p{
+        color: #98a2b3;
+        margin-top: 10px;
+    }
+
+    .stats-row{
+        margin-top: 25px;
+    }
+
+    .mini-stat{
+        background: white;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        height: 100%;
+        transition: 0.3s ease;
+        border: 1px solid #eef2f7;
+    }
+
+    .mini-stat:hover{
+        transform: translateY(-6px);
+    }
+
+    .mini-icon{
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        font-size: 24px;
+    }
+
+    .bg-red-soft{
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+    }
+
+    .bg-blue-soft{
+        background: rgba(59,130,246,0.12);
+        color: #2563eb;
+    }
+
+    .bg-green-soft{
+        background: rgba(34,197,94,0.12);
+        color: #16a34a;
+    }
+
+    .mini-stat h3{
+        font-weight: 800;
+        margin-bottom: 5px;
+        color: #111827;
+    }
+
+    .mini-stat p{
+        margin: 0;
+        color: #667085;
+        font-size: 14px;
+    }
+
     @keyframes slideInRight {
         from {
             transform: translateX(100%);
@@ -29,37 +245,196 @@
             opacity: 1;
         }
     }
+
     .animate-slide-in {
         animation: slideInRight 0.5s ease-out forwards;
     }
+
+    @media(max-width:768px){
+
+        .page-header{
+            padding: 28px 22px;
+            border-radius: 22px;
+        }
+
+        .page-header h2{
+            font-size: 24px;
+        }
+
+        .approval-card{
+            padding: 18px;
+        }
+
+        .table thead{
+            display: none;
+        }
+
+        .table tbody tr{
+            display: block;
+            margin-bottom: 18px;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .table tbody td{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table tbody td::before{
+            content: attr(data-label);
+            font-weight: 700;
+            color: #344054;
+        }
+
+        .user-box{
+            justify-content: flex-end;
+        }
+    }
 </style>
 
-{% if pending_users %}
-<div class="table-responsive">
-    <table class="table table-hover shadow-sm bg-white">
-        <thead class="table-primary">
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Approve</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in pending_users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td class="text-capitalize">{{ user.role }}</td>
-                <td>
-                    <a href="{% url 'approve_user' user.id %}" class="btn btn-success btn-sm">Approve</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% if messages %}
+<div id="msg-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show animate-slide-in shadow border-0 rounded-4">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
 </div>
-{% else %}
-<p class="text-muted">No pending users to approve.</p>
 {% endif %}
+
+<div class="container-fluid px-2 px-md-4">
+
+    <!-- Header -->
+    <div class="page-header mb-4">
+        <h2>
+            <i class="bi bi-person-check-fill me-2"></i>
+            Pending User Approvals
+        </h2>
+        <p>
+            Review newly registered doctors, donors, and patients before granting access.
+        </p>
+    </div>
+
+    <!-- Stats -->
+    <div class="row stats-row g-4">
+        <div class="col-md-4">
+            <div class="mini-stat">
+                <div class="mini-icon bg-red-soft">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <h3>{{ pending_users|length }}</h3>
+                <p>Users Waiting Approval</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="mini-stat">
+                <div class="mini-icon bg-blue-soft">
+                    <i class="bi bi-hospital"></i>
+                </div>
+                <h3>24/7</h3>
+                <p>Blood Bank Monitoring</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="mini-stat">
+                <div class="mini-icon bg-green-soft">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h3>100%</h3>
+                <p>Secure Approval System</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="approval-card">
+
+        {% if pending_users %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for user in pending_users %}
+                    <tr>
+
+                        <td data-label="User">
+                            <div class="user-box">
+                                <div class="user-avatar">
+                                    {{ user.username|first|upper }}
+                                </div>
+
+                                <div>
+                                    <div class="fw-bold text-dark">
+                                        {{ user.username }}
+                                    </div>
+
+                                    <small class="text-muted">
+                                        Pending verification
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td data-label="Email">
+                            {{ user.email }}
+                        </td>
+
+                        <td data-label="Role">
+                            <span class="role-badge 
+                                {% if user.role == 'doctor' %}
+                                    role-doctor
+                                {% elif user.role == 'donor' %}
+                                    role-donor
+                                {% else %}
+                                    role-patient
+                                {% endif %}
+                            ">
+                                {{ user.role }}
+                            </span>
+                        </td>
+
+                        <td data-label="Action" class="text-md-end">
+                            <a href="{% url 'approve_user' user.id %}" class="approve-btn text-decoration-none">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                Approve
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            <i class="bi bi-check2-circle"></i>
+            <h4>No Pending Users</h4>
+            <p>All registration requests have already been approved.</p>
+        </div>
+
+        {% endif %}
+    </div>
+</div>
+
 {% endblock %}

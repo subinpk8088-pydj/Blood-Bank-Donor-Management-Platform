@@ -1,153 +1,644 @@
 {% extends 'admin/base_admin.html' %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Pending Blood Requests{% endblock %}
+
 {% block content %}
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-droplet-half text-danger me-2"></i>Pending Blood Requests</h2>
-        <div class="btn-toolbar">
-            <div class="btn-group me-2">
-                <button type="button" class="btn btn-sm btn-outline-success" id="exportCSV">
-                    <i class="bi bi-file-earmark-excel me-1"></i>Export CSV
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary" id="printList">
-                    <i class="bi bi-printer me-1"></i>Print
-                </button>
+<style>
+
+    body{
+        background: #f4f7fb;
+    }
+
+    .dashboard-header{
+        background: linear-gradient(135deg,#dc3545,#b91c1c);
+        border-radius: 30px;
+        padding: 35px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(220,53,69,0.18);
+    }
+
+    .dashboard-header::before{
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        top: -100px;
+        right: -50px;
+    }
+
+    .dashboard-header::after{
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        bottom: -80px;
+        left: -60px;
+    }
+
+    .dashboard-header h2{
+        color: white;
+        font-weight: 800;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-header p{
+        color: rgba(255,255,255,0.85);
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .top-btn{
+        border: none;
+        border-radius: 14px;
+        padding: 10px 18px;
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .top-btn:hover{
+        transform: translateY(-3px);
+    }
+
+    .btn-export{
+        background: white;
+        color: #198754;
+    }
+
+    .btn-print{
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .stats-card{
+        background: white;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid #eef2f7;
+        transition: 0.3s ease;
+        height: 100%;
+    }
+
+    .stats-card:hover{
+        transform: translateY(-6px);
+    }
+
+    .stats-icon{
+        width: 65px;
+        height: 65px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 18px;
+    }
+
+    .soft-red{
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+    }
+
+    .soft-green{
+        background: rgba(34,197,94,0.12);
+        color: #16a34a;
+    }
+
+    .soft-blue{
+        background: rgba(59,130,246,0.12);
+        color: #2563eb;
+    }
+
+    .stats-card h3{
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 5px;
+    }
+
+    .stats-card p{
+        color: #667085;
+        margin: 0;
+    }
+
+    .filter-card,
+    .table-card{
+        background: white;
+        border-radius: 28px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .filter-card{
+        padding: 25px;
+    }
+
+    .table-card{
+        padding: 22px;
+    }
+
+    .form-select{
+        height: 54px;
+        border-radius: 16px;
+        border: 1px solid #d0d5dd;
+        box-shadow: none !important;
+    }
+
+    .form-select:focus{
+        border-color: #dc3545;
+    }
+
+    .input-group-text{
+        border-radius: 16px 0 0 16px;
+        background: #fff;
+        border: 1px solid #d0d5dd;
+    }
+
+    .clear-btn{
+        border-radius: 0 16px 16px 0;
+        font-weight: 700;
+    }
+
+    .custom-table{
+        margin: 0;
+    }
+
+    .custom-table thead th{
+        background: #f8fafc;
+        border: none;
+        color: #344054;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 18px;
+        text-transform: uppercase;
+    }
+
+    .custom-table tbody tr{
+        border-bottom: 1px solid #f1f5f9;
+        transition: 0.3s ease;
+    }
+
+    .custom-table tbody tr:hover{
+        background: #fff5f5;
+        transform: scale(1.002);
+    }
+
+    .custom-table tbody td{
+        padding: 18px;
+        border: none;
+        vertical-align: middle;
+        color: #475467;
+        font-weight: 500;
+    }
+
+    .blood-badge{
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+        padding: 8px 15px;
+        border-radius: 30px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .notify-btn{
+        border: none;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        color: white;
+        border-radius: 16px;
+        padding: 14px 25px;
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .notify-btn:hover{
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(220,53,69,0.25);
+    }
+
+    .pagination .page-link{
+        border: none;
+        margin: 0 5px;
+        border-radius: 12px !important;
+        color: #344054;
+        min-width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .empty-state{
+        padding: 70px 20px;
+    }
+
+    .empty-state i{
+        font-size: 65px;
+        color: #cbd5e1;
+    }
+
+    .empty-state h5{
+        margin-top: 18px;
+        font-weight: 800;
+    }
+
+    @media(max-width:768px){
+
+        .dashboard-header{
+            border-radius: 24px;
+            padding: 25px;
+        }
+
+        .dashboard-header h2{
+            font-size: 24px;
+        }
+
+        .filter-card,
+        .table-card{
+            border-radius: 22px;
+        }
+
+        .custom-table thead{
+            display: none;
+        }
+
+        .custom-table tbody tr{
+            display: block;
+            background: white;
+            margin-bottom: 18px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .custom-table tbody td{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .custom-table tbody td::before{
+            content: attr(data-label);
+            font-weight: 700;
+            color: #344054;
+        }
+
+    }
+
+    @media print {
+
+        nav,
+        .btn-toolbar,
+        footer,
+        .notify-btn,
+        #filterForm {
+            display: none !important;
+        }
+
+        body{
+            background: white;
+        }
+
+        .dashboard-header,
+        .stats-card,
+        .filter-card,
+        .table-card{
+            box-shadow: none !important;
+        }
+
+        @page{
+            size: landscape;
+            margin: 1cm;
+        }
+
+    }
+
+</style>
+
+<div class="container-fluid px-2 px-md-4 py-4">
+
+    <!-- HEADER -->
+
+    <div class="dashboard-header mb-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+            <div>
+
+                <h2>
+                    <i class="bi bi-droplet-half me-2"></i>
+                    Pending Blood Requests
+                </h2>
+
+                <p>
+                    Manage emergency blood requests and notify matching donors instantly.
+                </p>
+
             </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+
+                <button type="button" class="top-btn btn-export" id="exportCSV">
+                    <i class="bi bi-file-earmark-excel me-2"></i>
+                    Export CSV
+                </button>
+
+                <button type="button" class="top-btn btn-print" id="printList">
+                    <i class="bi bi-printer me-2"></i>
+                    Print
+                </button>
+
+            </div>
+
         </div>
+
     </div>
-    
-    <!-- Blood Group Filter -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form id="filterForm" method="get" class="row g-3 align-items-center">
-                <div class="col-md-4">
-                    <label for="bloodGroupFilter" class="form-label">Filter by Blood Group:</label>
-                    <div class="input-group">
-                        <select class="form-select" id="bloodGroupFilter" name="blood_group">
-                            <option value="">All Blood Groups</option>
-                            {% for group in blood_groups %}
-                                <option value="{{ group }}" {% if current_filter == group %}selected{% endif %}>{{ group }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if current_filter %}
-                            <a href="{% url 'view_blood_requests' %}" class="btn btn-outline-danger">Clear</a>
-                        {% endif %}
-                    </div>
+
+    <!-- STATS -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="stats-card">
+
+                <div class="stats-icon soft-red">
+                    <i class="bi bi-droplet"></i>
                 </div>
-            </form>
+
+                <h3>{{ requests|length }}</h3>
+
+                <p>Pending Blood Requests</p>
+
+            </div>
+
         </div>
+
+        <div class="col-md-4">
+
+            <div class="stats-card">
+
+                <div class="stats-icon soft-green">
+                    <i class="bi bi-megaphone"></i>
+                </div>
+
+                <h3>Instant Alerts</h3>
+
+                <p>Quick donor notification system</p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="stats-card">
+
+                <div class="stats-icon soft-blue">
+                    <i class="bi bi-heart-pulse"></i>
+                </div>
+
+                <h3>24/7</h3>
+
+                <p>Emergency blood support service</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTER -->
+
+    <div class="filter-card mb-4">
+
+        <form id="filterForm" method="get">
+
+            <div class="row align-items-end g-3">
+
+                <div class="col-lg-4">
+
+                    <label class="form-label fw-bold mb-2">
+                        Filter by Blood Group
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-funnel-fill text-danger"></i>
+                        </span>
+
+                        <select class="form-select" id="bloodGroupFilter" name="blood_group">
+
+                            <option value="">All Blood Groups</option>
+
+                            {% for group in blood_groups %}
+
+                            <option value="{{ group }}" {% if current_filter == group %}selected{% endif %}>
+                                {{ group }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        {% if current_filter %}
+
+                        <a href="{% url 'view_blood_requests' %}" class="btn btn-outline-danger clear-btn">
+                            Clear
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+
     </div>
 
     {% if requests %}
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <form method="post" action="{% url 'send_blood_request_emails' %}">
-                    {% csrf_token %}
-                    <table class="table table-hover bg-white rounded shadow-sm">
-                        <thead class="table-danger">
-                            <tr>
-                                <th>#</th>
-                                <th>Patient Name</th>
-                                <th>Blood Group</th>
-                                <th>Quantity</th>
-                                <th>Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for request in requests %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ request.patient.get_full_name }}</td>
-                                <td>
-                                    <span class="badge bg-danger text-white">
-                                        <i class="bi bi-droplet-fill me-1"></i> {{ request.blood_group }}
-                                    </span>
-                                </td>
-                                <td>{{ request.quantity }}</td>
-                                <td>{{ request.reason }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                
-                    <button type="submit" class="btn btn-primary mt-3">Notify Donors</button>
-                </form>
-                
-            </div>
+
+    <!-- TABLE -->
+
+    <div class="table-card">
+
+        <div class="table-responsive">
+
+            <form method="post" action="{% url 'send_blood_request_emails' %}">
+
+                {% csrf_token %}
+
+                <table class="table custom-table align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>#</th>
+                            <th>Patient Name</th>
+                            <th>Blood Group</th>
+                            <th>Quantity</th>
+                            <th>Reason</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for request in requests %}
+
+                        <tr>
+
+                            <td data-label="#">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td data-label="Patient">
+                                <span class="fw-bold text-dark">
+                                    {{ request.patient.get_full_name }}
+                                </span>
+                            </td>
+
+                            <td data-label="Blood Group">
+
+                                <span class="blood-badge">
+                                    <i class="bi bi-droplet-fill me-2"></i>
+                                    {{ request.blood_group }}
+                                </span>
+
+                            </td>
+
+                            <td data-label="Quantity">
+                                {{ request.quantity }}
+                            </td>
+
+                            <td data-label="Reason">
+                                {{ request.reason }}
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                <div class="mt-4">
+
+                    <button type="submit" class="notify-btn">
+                        <i class="bi bi-send-fill me-2"></i>
+                        Notify Donors
+                    </button>
+
+                </div>
+
+            </form>
+
         </div>
+
     </div>
+
     {% else %}
-    <div class="alert alert-info">
-        {% if current_filter %}
-            No pending blood requests found for blood group: {{ current_filter }}
-        {% else %}
-            No pending blood requests.
-        {% endif %}
+
+    <div class="table-card">
+
+        <div class="empty-state text-center">
+
+            <i class="bi bi-search"></i>
+
+            <h5>
+                No Pending Blood Requests
+            </h5>
+
+            <p class="text-muted">
+
+                {% if current_filter %}
+                    No requests found for blood group {{ current_filter }}
+                {% else %}
+                    There are currently no pending blood requests.
+                {% endif %}
+
+            </p>
+
+        </div>
+
     </div>
+
     {% endif %}
+
 </div>
 
-<!-- Live Filter Script -->
 <script>
-    // Auto-submit when blood group changes
-    document.getElementById('bloodGroupFilter').addEventListener('change', function() {
+
+    // AUTO FILTER
+
+    document.getElementById('bloodGroupFilter').addEventListener('change', function () {
         document.getElementById('filterForm').submit();
     });
 
+    // EXPORT CSV
+
     document.getElementById('exportCSV').addEventListener('click', function () {
+
         let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Full Name,Blood Group,Quantity,Reason\n";
+
+        csvContent += "Patient Name,Blood Group,Quantity,Reason\n";
 
         const rows = document.querySelectorAll('table tbody tr');
+
         rows.forEach(row => {
+
             const cols = row.querySelectorAll('td');
+
             const fullName = cols[1].textContent.trim();
+
             const bloodGroup = cols[2].textContent.replace(/\s+/g, ' ').trim();
+
             const quantity = cols[3].textContent.trim();
+
             const reason = cols[4].textContent.trim();
+
             csvContent += `"${fullName}","${bloodGroup}","${quantity}","${reason}"\n`;
+
         });
 
         const encodedUri = encodeURI(csvContent);
+
         const link = document.createElement("a");
+
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "pending_blood_requests_" + new Date().toISOString().slice(0,10) + ".csv");
+
+        link.setAttribute("download", "pending_blood_requests.csv");
+
         document.body.appendChild(link);
+
         link.click();
+
         document.body.removeChild(link);
+
     });
+
+    // PRINT
 
     document.getElementById('printList').addEventListener('click', function () {
         window.print();
     });
-</script>
 
-<style>
-    @media print {
-        nav, .btn-toolbar, .page-item, footer, .btn, .dropdown, #filterForm {
-            display: none !important;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        .container-fluid {
-            padding: 0;
-        }
-        .card {
-            box-shadow: none !important;
-            border: none !important;
-        }
-        table {
-            width: 100%;
-        }
-        @page {
-            size: landscape;
-            margin: 1cm;
-        }
-    }
-</style>
+</script>
 
 {% endblock %}

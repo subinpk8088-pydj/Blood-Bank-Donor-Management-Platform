@@ -5,236 +5,454 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Dashboard{% endblock %}</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
     <style>
-        /* Remove default margin and padding from body */
-        body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            transition: background-color 0.3s;
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
-        
-        /* Wrapper takes full width and height */
-        #wrapper {
-            display: flex;
-            width: 100%;
-            align-items: stretch;
-            min-height: 100vh;
+
+        body{
+            overflow-x:hidden;
+            background:#f5f7fb;
+            font-family: "Segoe UI", sans-serif;
         }
-        
-        #sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            height: 100vh;
-            background: #0d6efd;
-            color: #fff;
-            transition: all 0.3s;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 999;
+
+        /* =========================
+            WRAPPER
+        ========================== */
+
+        #wrapper{
+            display:flex;
+            width:100%;
+            min-height:100vh;
         }
-        
-        #sidebar.active {
-            margin-left: -250px;
+
+        /* =========================
+            SIDEBAR
+        ========================== */
+
+        #sidebar{
+            min-width:260px;
+            max-width:260px;
+            height:100vh;
+            position:fixed;
+            top:0;
+            left:0;
+            z-index:999;
+
+            background:linear-gradient(180deg,#7f1d1d 0%, #991b1b 45%, #450a0a 100%);
+            color:#fff;
+
+            transition:all 0.3s ease;
+
+            box-shadow:0 0 25px rgba(0,0,0,0.15);
         }
-        
-        #sidebar .sidebar-header {
-            padding: 20px;
-            background: #0b5ed7;
+
+        #sidebar.active{
+            margin-left:-260px;
         }
-        
-        #sidebar ul.components {
-            padding: 20px 0;
+
+        /* Sidebar Header */
+
+        #sidebar .sidebar-header{
+            padding:24px 20px;
+            background:rgba(255,255,255,0.08);
+            border-bottom:1px solid rgba(255,255,255,0.08);
         }
-        
-        #sidebar ul li a {
-            padding: 10px 15px;
-            display: block;
-            color: #fff;
-            text-decoration: none;
-            border-left: 3px solid transparent;
+
+        #sidebar .sidebar-header h5{
+            margin:0;
+            font-size:22px;
+            font-weight:700;
+            letter-spacing:0.5px;
         }
-        
-        #sidebar ul li a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-left: 3px solid #fff;
+
+        #sidebar .sidebar-header p{
+            margin:4px 0 0;
+            font-size:13px;
+            opacity:0.8;
         }
-        
+
+        /* Sidebar Menu */
+
+        #sidebar ul.components{
+            padding:20px 0;
+        }
+
+        #sidebar ul li{
+            padding:0 12px;
+            margin-bottom:6px;
+        }
+
+        #sidebar ul li a{
+            padding:13px 16px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+
+            color:#fef2f2;
+            text-decoration:none;
+
+            border-radius:12px;
+
+            transition:all 0.3s ease;
+
+            font-size:15px;
+            font-weight:500;
+        }
+
+        #sidebar ul li a i{
+            width:22px;
+            text-align:center;
+            font-size:15px;
+        }
+
+        #sidebar ul li a:hover{
+            background:rgba(255,255,255,0.12);
+            transform:translateX(4px);
+        }
+
         #sidebar ul li.active > a,
-        #sidebar ul li a.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-left: 3px solid #fff;
+        #sidebar ul li a.active{
+            background:#ffffff;
+            color:#991b1b;
+            font-weight:700;
+
+            box-shadow:0 8px 20px rgba(0,0,0,0.12);
         }
-        
-        #content {
-            width: 100%;
-            min-height: 100vh;
-            transition: all 0.3s;
-            margin-left: 250px;
+
+        /* =========================
+            CONTENT
+        ========================== */
+
+        #content{
+            width:100%;
+            min-height:100vh;
+            margin-left:260px;
+            transition:all 0.3s ease;
         }
-        
-        #content.active {
-            margin-left: 0;
+
+        #content.active{
+            margin-left:0;
         }
-        
-        .overlay {
-            display: none;
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 998;
-            opacity: 0;
-            transition: all 0.5s ease-in-out;
-            top: 0;
-            left: 0;
+
+        /* =========================
+            NAVBAR
+        ========================== */
+
+        .navbar{
+            padding:14px 22px;
+
+            background:#991b1b;
+
+            border:none;
+            border-radius:0;
+
+            box-shadow:0 2px 10px rgba(0,0,0,0.08);
         }
-        
-        .overlay.active {
-            display: block;
-            opacity: 1;
+
+        .navbar-brand{
+            font-size:22px;
+            font-weight:700;
+            color:white !important;
         }
-        
-        #dismiss {
-            width: 35px;
-            height: 35px;
-            line-height: 35px;
-            text-align: center;
-            background: #0b5ed7;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            border-radius: 50%;
-            display: none;
+
+        .top-user{
+            font-size:14px;
+            font-weight:500;
         }
-        
-        /* Top navbar with no gaps */
-        .navbar {
-            padding: 0.75rem 1rem;
-            background: #0d6efd;
-            border: none;
-            border-radius: 0;
-            margin-bottom: 0;
-            width: 100%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+        /* Toggle Button */
+
+        #sidebarCollapse{
+            background:transparent;
+            color:white;
+            border:none;
+            font-size:24px;
+            display:none;
         }
-        
-        .navbar-brand {
-            font-weight: 700;
+
+        /* Logout Button */
+
+        .logout-btn{
+            border-radius:10px;
+            padding:8px 18px;
+            font-size:14px;
+            font-weight:600;
+            border:1px solid rgba(255,255,255,0.4);
+            transition:0.3s ease;
         }
-        
-        #sidebarCollapse {
-            background: transparent;
-            color: white;
-            border: none;
-            font-size: 1.5rem;
-            display: none; /* Hide by default on desktop */
+
+        .logout-btn:hover{
+            background:white;
+            color:#991b1b !important;
         }
-        
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            #sidebar {
-                margin-left: -250px;
+
+        /* =========================
+            MAIN CONTENT
+        ========================== */
+
+        .content-container{
+            padding:28px;
+        }
+
+        /* =========================
+            OVERLAY
+        ========================== */
+
+        .overlay{
+            display:none;
+            position:fixed;
+            width:100vw;
+            height:100vh;
+
+            background:rgba(0,0,0,0.5);
+
+            z-index:998;
+            top:0;
+            left:0;
+
+            opacity:0;
+            transition:all 0.4s ease;
+        }
+
+        .overlay.active{
+            display:block;
+            opacity:1;
+        }
+
+        /* =========================
+            DISMISS BUTTON
+        ========================== */
+
+        #dismiss{
+            width:36px;
+            height:36px;
+            border-radius:50%;
+
+            background:rgba(255,255,255,0.15);
+
+            display:none;
+
+            position:absolute;
+            top:15px;
+            right:15px;
+
+            text-align:center;
+            line-height:36px;
+
+            cursor:pointer;
+            transition:0.3s ease;
+        }
+
+        #dismiss:hover{
+            background:white;
+            color:#991b1b;
+        }
+
+        /* =========================
+            SCROLLBAR
+        ========================== */
+
+        #sidebar::-webkit-scrollbar{
+            width:6px;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb{
+            background:rgba(255,255,255,0.2);
+            border-radius:10px;
+        }
+
+        /* =========================
+            RESPONSIVE
+        ========================== */
+
+        @media (max-width:768px){
+
+            #sidebar{
+                margin-left:-260px;
             }
-            #sidebar.active {
-                margin-left: 0;
+
+            #sidebar.active{
+                margin-left:0;
             }
-            #content {
-                margin-left: 0;
+
+            #content{
+                margin-left:0;
             }
-            #content.active {
-                margin-left: 0;
+
+            #content.active{
+                margin-left:0;
             }
-            #dismiss {
-                display: block;
+
+            #dismiss{
+                display:block;
             }
-            #sidebarCollapse {
-                display: block; /* Show on small screens */
+
+            #sidebarCollapse{
+                display:block;
             }
-            #sidebarCollapse span {
-                display: none;
+
+            .navbar-brand{
+                font-size:18px;
+            }
+
+            .content-container{
+                padding:18px;
             }
         }
+
     </style>
 </head>
+
 <body>
+
     <div id="wrapper">
-        <!-- Sidebar -->
+
+        <!-- =========================
+                SIDEBAR
+        ========================== -->
+
         <nav id="sidebar">
+
             <div id="dismiss">
-                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-times"></i>
             </div>
-            
+
             <div class="sidebar-header">
-                <h5>Blood Center </h5>
+                <h5>
+                    <i class="fas fa-droplet me-2"></i>
+                    Blood Center
+                </h5>
+
+                <p>Management Dashboard</p>
             </div>
-            
+
             <ul class="list-unstyled components">
                 {% block sidebar %}
                 {% endblock %}
             </ul>
+
         </nav>
 
-        <!-- Page Content -->
+        <!-- =========================
+                CONTENT
+        ========================== -->
+
         <div id="content">
-            <!-- Navbar -->
+
+            <!-- NAVBAR -->
+
             <nav class="navbar navbar-expand-lg navbar-dark">
+
                 <div class="container-fluid">
-                    <button type="button" id="sidebarCollapse" class="btn">
+
+                    <button type="button" id="sidebarCollapse">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <a class="navbar-brand ms-3" href="#">Blood Center Dashboard</a>
+
+                    <a class="navbar-brand ms-3" href="#">
+                        Blood Center Dashboard
+                    </a>
+
                     <div class="ms-auto d-flex align-items-center">
-                        <span class="text-white me-3 d-none d-md-block">Welcome, {{ request.user.username }}</span>
-                        <a href="{% url 'logout_view' %}" class="btn btn-outline-light btn-sm">Logout</a>
+
+                        <span class="text-white me-3 d-none d-md-block top-user">
+                            <i class="fas fa-user-circle me-1"></i>
+                            Welcome, {{ request.user.username }}
+                        </span>
+
+                        <a href="{% url 'logout_view' %}" class="btn btn-outline-light btn-sm logout-btn">
+                            <i class="fas fa-sign-out-alt me-1"></i>
+                            Logout
+                        </a>
+
                     </div>
+
                 </div>
+
             </nav>
 
-            <!-- Main Content -->
+            <!-- MAIN CONTENT -->
+
             <div class="content-container">
                 {% block content %}
                 {% endblock %}
             </div>
+
         </div>
+
     </div>
+
+    <!-- OVERLAY -->
 
     <div class="overlay"></div>
 
-    <!-- Scripts -->
+    <!-- =========================
+            SCRIPTS
+    ========================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
+
         $(document).ready(function () {
-            // Sidebar toggle for mobile and desktop
+
+            // Close Sidebar
+
             $('#dismiss, .overlay').on('click', function () {
+
                 $('#sidebar').removeClass('active');
                 $('#content').removeClass('active');
                 $('.overlay').removeClass('active');
+
             });
 
+            // Open Sidebar
+
             $('#sidebarCollapse').on('click', function () {
+
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
                 $('.overlay').toggleClass('active');
+
                 $('.collapse.in').toggleClass('in');
+
                 $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+
             });
-            
-            // Add active class to current page
+
+            // Active Sidebar Link
+
             var path = window.location.pathname;
+
             $("#sidebar ul li a").each(function() {
+
                 var href = $(this).attr('href');
-                if (path.includes(href) && href !== "#") {
+
+                if(path.includes(href) && href !== "#"){
+
                     $(this).addClass('active');
                     $(this).parent().addClass('active');
+
                 }
+
             });
+
         });
+
     </script>
+
 </body>
 </html>

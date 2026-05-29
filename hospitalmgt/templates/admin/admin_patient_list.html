@@ -3,177 +3,848 @@
 {% block title %}Patient List - Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-people-fill me-2 text-primary"></i>Patient Management</h2>
-        <div class="btn-toolbar">
-            <div class="btn-group me-2">
-                <button type="button" class="btn btn-sm btn-outline-success" id="exportCSV">
-                    <i class="bi bi-file-earmark-excel me-1"></i>Export CSV
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary" id="printList">
-                    <i class="bi bi-printer me-1"></i>Print
-                </button>
+
+<style>
+
+    body{
+        background: #f4f7fb;
+    }
+
+    .dashboard-header{
+        background: linear-gradient(135deg,#dc3545,#b91c1c);
+        border-radius: 30px;
+        padding: 35px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(220,53,69,0.18);
+    }
+
+    .dashboard-header::before{
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        top: -100px;
+        right: -50px;
+    }
+
+    .dashboard-header::after{
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        bottom: -80px;
+        left: -60px;
+    }
+
+    .dashboard-header h2{
+        color: white;
+        font-weight: 800;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-header p{
+        color: rgba(255,255,255,0.85);
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .top-btn{
+        border: none;
+        border-radius: 14px;
+        padding: 10px 18px;
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .top-btn:hover{
+        transform: translateY(-3px);
+    }
+
+    .btn-export{
+        background: white;
+        color: #198754;
+    }
+
+    .btn-print{
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .stats-card{
+        background: white;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid #eef2f7;
+        transition: 0.3s ease;
+        height: 100%;
+    }
+
+    .stats-card:hover{
+        transform: translateY(-6px);
+    }
+
+    .stats-icon{
+        width: 65px;
+        height: 65px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 18px;
+    }
+
+    .soft-red{
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+    }
+
+    .soft-green{
+        background: rgba(34,197,94,0.12);
+        color: #16a34a;
+    }
+
+    .soft-blue{
+        background: rgba(59,130,246,0.12);
+        color: #2563eb;
+    }
+
+    .stats-card h3{
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 5px;
+    }
+
+    .stats-card p{
+        color: #667085;
+        margin: 0;
+    }
+
+    .filter-card,
+    .table-card{
+        background: white;
+        border-radius: 28px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .filter-card{
+        padding: 25px;
+    }
+
+    .table-card{
+        padding: 22px;
+    }
+
+    .form-control,
+    .form-select{
+        height: 54px;
+        border-radius: 16px;
+        border: 1px solid #d0d5dd;
+        box-shadow: none !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus{
+        border-color: #dc3545;
+    }
+
+    .input-group-text{
+        border-radius: 16px 0 0 16px;
+        background: #fff;
+        border: 1px solid #d0d5dd;
+    }
+
+    .filter-btn{
+        height: 54px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .filter-btn:hover{
+        transform: translateY(-3px);
+    }
+
+    .custom-table{
+        margin: 0;
+    }
+
+    .custom-table thead th{
+        background: #f8fafc;
+        border: none;
+        color: #344054;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 18px;
+        text-transform: uppercase;
+    }
+
+    .custom-table tbody tr{
+        border-bottom: 1px solid #f1f5f9;
+        transition: 0.3s ease;
+    }
+
+    .custom-table tbody tr:hover{
+        background: #fff5f5;
+        transform: scale(1.002);
+    }
+
+    .custom-table tbody td{
+        padding: 18px;
+        border: none;
+        vertical-align: middle;
+        color: #475467;
+        font-weight: 500;
+    }
+
+    .patient-box{
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .patient-img{
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    }
+
+    .patient-placeholder{
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 22px;
+        box-shadow: 0 8px 20px rgba(220,53,69,0.2);
+    }
+
+    .patient-id-badge{
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+        padding: 8px 15px;
+        border-radius: 30px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .status-active{
+        background: rgba(34,197,94,0.12);
+        color: #16a34a;
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-weight: 700;
+    }
+
+    .status-inactive{
+        background: rgba(239,68,68,0.12);
+        color: #dc2626;
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-weight: 700;
+    }
+
+    .delete-btn{
+        border: none;
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+        border-radius: 12px;
+        padding: 10px 14px;
+        transition: 0.3s ease;
+        font-weight: 700;
+    }
+
+    .delete-btn:hover{
+        background: #dc3545;
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .pagination .page-link{
+        border: none;
+        margin: 0 5px;
+        border-radius: 12px !important;
+        color: #344054;
+        min-width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .pagination .active .page-link{
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        color: white;
+    }
+
+    .empty-state{
+        padding: 70px 20px;
+    }
+
+    .empty-state i{
+        font-size: 65px;
+        color: #cbd5e1;
+    }
+
+    .empty-state h5{
+        margin-top: 18px;
+        font-weight: 800;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .animate-slide-in {
+        animation: slideInRight 0.5s ease-out forwards;
+    }
+
+    @media(max-width:992px){
+
+        .dashboard-header{
+            padding: 28px;
+        }
+
+        .dashboard-header .d-flex{
+            flex-direction: column;
+            align-items: start !important;
+            gap: 18px;
+        }
+    }
+
+    @media(max-width:768px){
+
+        .dashboard-header{
+            border-radius: 24px;
+        }
+
+        .dashboard-header h2{
+            font-size: 24px;
+        }
+
+        .filter-card,
+        .table-card{
+            border-radius: 22px;
+        }
+
+        .custom-table thead{
+            display: none;
+        }
+
+        .custom-table tbody tr{
+            display: block;
+            background: white;
+            margin-bottom: 18px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .custom-table tbody td{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .custom-table tbody td::before{
+            content: attr(data-label);
+            font-weight: 700;
+            color: #344054;
+        }
+
+        .patient-box{
+            justify-content: flex-end;
+        }
+
+    }
+
+    @media print {
+
+        nav,
+        form,
+        .btn-toolbar,
+        .pagination,
+        footer,
+        .delete-btn {
+            display: none !important;
+        }
+
+        body {
+            background: white;
+        }
+
+        .dashboard-header,
+        .stats-card,
+        .filter-card,
+        .table-card{
+            box-shadow: none !important;
+        }
+
+        @page {
+            size: landscape;
+            margin: 1cm;
+        }
+    }
+
+</style>
+
+<div class="container-fluid px-2 px-md-4 py-4">
+
+    <!-- HEADER -->
+
+    <div class="dashboard-header mb-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+            <div>
+                <h2>
+                    <i class="bi bi-people-fill me-2"></i>
+                    Patient Management
+                </h2>
+
+                <p>
+                    Manage registered patients, monitor activity and patient records.
+                </p>
             </div>
+
+            <div class="btn-toolbar">
+
+                <div class="d-flex gap-2 flex-wrap">
+
+                    <button type="button" class="top-btn btn-export" id="exportCSV">
+                        <i class="bi bi-file-earmark-excel me-2"></i>
+                        Export CSV
+                    </button>
+
+                    <button type="button" class="top-btn btn-print" id="printList">
+                        <i class="bi bi-printer me-2"></i>
+                        Print
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
+
     </div>
 
     {% if messages %}
     <div id="msg-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate-slide-in shadow" role="alert">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate-slide-in shadow border-0 rounded-4">
             <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Search and Filter -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" name="search" placeholder="Search by name, ID, email or phone" value="{{ request.GET.search }}">
-                    </div>
+    <!-- STATS -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon soft-red">
+                    <i class="bi bi-people-fill"></i>
                 </div>
-                <div class="col-md-4">
-                    <select name="status" class="form-select">
-                        <option value="">All Status</option>
-                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
-                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-            </form>
+
+                <h3>{{ patients.paginator.count }}</h3>
+                <p>Total Registered Patients</p>
+            </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon soft-green">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+
+                <h3>Active</h3>
+                <p>Verified Active Patients</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon soft-blue">
+                    <i class="bi bi-heart-pulse"></i>
+                </div>
+
+                <h3>24/7</h3>
+                <p>Healthcare Support</p>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Patient List -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover shadow-sm bg-white rounded">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>#</th>
-                            <th>Patient ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Status</th>
-                            <th>Joined On</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for patient in patients %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ patient.patient_id }}</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    {% if patient.profile_image %}
-                                    <img src="{{ patient.profile_image.url }}" class="rounded-circle me-2" width="40" height="40" alt="{{ patient.get_full_name }}">
-                                    {% else %}
-                                    <div class="bg-secondary rounded-circle me-2 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
-                                        <i class="bi bi-person-fill text-white"></i>
-                                    </div>
-                                    {% endif %}
-                                    <div>
-                                        <div class="fw-bold">{{ patient.get_full_name }}</div>
-                                        <small class="text-muted">{{ patient.username }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ patient.email }}</td>
-                            <td>{{ patient.phone }}</td>
-                            <td>
-                                <span class="badge bg-{% if patient.is_active %}success{% else %}danger{% endif %}">
-                                    {% if patient.is_active %}Active{% else %}Inactive{% endif %}
-                                </span>
-                            </td>
-                            <td>{{ patient.date_joined|date:"M d, Y" }}</td>
-                            <td>
-                                <!-- Delete button -->
-                                <form method="POST" action="{% url 'delete_patient' patient.id %}" style="display:inline;" onsubmit="return confirmDelete()">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash me-1"></i>Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <div class="d-flex flex-column align-items-center">
-                                    <i class="bi bi-search fs-1 text-muted mb-3"></i>
-                                    <h5>No patients found</h5>
-                                    <p class="text-muted">Try adjusting your search or filter criteria</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- FILTER -->
+
+    <div class="filter-card mb-4">
+
+        <form method="GET">
+
+            <div class="row g-3">
+
+                <div class="col-lg-6">
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <input 
+                            type="text"
+                            class="form-control"
+                            name="search"
+                            placeholder="Search patient..."
+                            value="{{ request.GET.search }}"
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-4">
+
+                    <select name="status" class="form-select">
+
+                        <option value="">All Status</option>
+
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>
+                            Active
+                        </option>
+
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <button type="submit" class="btn filter-btn text-white w-100">
+                        Filter
+                    </button>
+
+                </div>
+
             </div>
 
-            <!-- Pagination -->
-            {% if patients.has_other_pages %}
-            <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if patients.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ patients.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    {% endif %}
+        </form>
 
-                    {% for num in patients.paginator.page_range %}
-                        {% if patients.number == num %}
-                        <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
-                        {% elif num > patients.number|add:'-3' and num < patients.number|add:'3' %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
-                        </li>
-                        {% endif %}
+    </div>
+
+    <!-- TABLE -->
+
+    <div class="table-card">
+
+        <div class="table-responsive">
+
+            <table class="table custom-table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Patient ID</th>
+                        <th>Patient</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for patient in patients %}
+
+                    <tr>
+
+                        <td data-label="#">
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td data-label="Patient ID">
+
+                            <span class="patient-id-badge">
+                                <i class="bi bi-person-vcard me-2"></i>
+                                {{ patient.patient_id }}
+                            </span>
+
+                        </td>
+
+                        <td data-label="Patient">
+
+                            <div class="patient-box">
+
+                                {% if patient.profile_image %}
+
+                                <img 
+                                    src="{{ patient.profile_image.url }}"
+                                    class="patient-img"
+                                    alt="{{ patient.get_full_name }}"
+                                >
+
+                                {% else %}
+
+                                <div class="patient-placeholder">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+
+                                {% endif %}
+
+                                <div>
+
+                                    <div class="fw-bold text-dark">
+                                        {{ patient.get_full_name }}
+                                    </div>
+
+                                    <small class="text-muted">
+                                        {{ patient.username }}
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <td data-label="Email">
+                            {{ patient.email }}
+                        </td>
+
+                        <td data-label="Phone">
+                            {{ patient.phone }}
+                        </td>
+
+                        <td data-label="Status">
+
+                            {% if patient.is_active %}
+
+                            <span class="status-active">
+                                Active
+                            </span>
+
+                            {% else %}
+
+                            <span class="status-inactive">
+                                Inactive
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td data-label="Joined">
+                            {{ patient.date_joined|date:"M d, Y" }}
+                        </td>
+
+                        <td data-label="Action">
+
+                            <form method="POST"
+                                action="{% url 'delete_patient' patient.id %}"
+                                onsubmit="return confirmDelete()">
+
+                                {% csrf_token %}
+
+                                <button type="submit" class="delete-btn">
+
+                                    <i class="bi bi-trash me-1"></i>
+                                    Delete
+
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            <div class="empty-state text-center">
+
+                                <i class="bi bi-search"></i>
+
+                                <h5>No Patients Found</h5>
+
+                                <p class="text-muted">
+                                    Try changing your filters or search keyword.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
                     {% endfor %}
 
-                    {% if patients.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ patients.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
+                </tbody>
+
+            </table>
+
         </div>
+
+        <!-- PAGINATION -->
+
+        {% if patients.has_other_pages %}
+
+        <nav class="mt-4">
+
+            <ul class="pagination justify-content-center">
+
+                {% if patients.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                    href="?page={{ patients.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in patients.paginator.page_range %}
+
+                    {% if patients.number == num %}
+
+                    <li class="page-item active">
+                        <a class="page-link" href="#">
+                            {{ num }}
+                        </a>
+                    </li>
+
+                    {% elif num > patients.number|add:'-3' and num < patients.number|add:'3' %}
+
+                    <li class="page-item">
+                        <a class="page-link"
+                        href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+
+                    {% endif %}
+
+                {% endfor %}
+
+                {% if patients.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                    href="?page={{ patients.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+        {% endif %}
+
     </div>
+
 </div>
 
-<script type="text/javascript">
+<script>
+
     function confirmDelete() {
         return confirm("Are you sure you want to delete this patient?");
     }
+
+    // CSV Export
+
+    document.getElementById('exportCSV').addEventListener('click', function () {
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+
+        csvContent += "Patient ID,Name,Email,Phone,Status,Joined On\n";
+
+        const rows = document.querySelectorAll('table tbody tr');
+
+        rows.forEach(row => {
+
+            if (!row.querySelector('td[colspan]')) {
+
+                const patientId = row.querySelector('td:nth-child(2)').textContent.trim();
+
+                const name = row.querySelector('td:nth-child(3) .fw-bold').textContent.trim();
+
+                const email = row.querySelector('td:nth-child(4)').textContent.trim();
+
+                const phone = row.querySelector('td:nth-child(5)').textContent.trim();
+
+                const status = row.querySelector('td:nth-child(6)').textContent.trim();
+
+                const joined = row.querySelector('td:nth-child(7)').textContent.trim();
+
+                csvContent += `"${patientId}","${name}","${email}","${phone}","${status}","${joined}"\n`;
+
+            }
+
+        });
+
+        const encodedUri = encodeURI(csvContent);
+
+        const link = document.createElement("a");
+
+        link.setAttribute("href", encodedUri);
+
+        link.setAttribute("download", "patients_list.csv");
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+
+    });
+
+    // PRINT
+
+    document.getElementById('printList').addEventListener('click', function () {
+        window.print();
+    });
+
 </script>
+
 {% endblock %}

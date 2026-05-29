@@ -1,147 +1,572 @@
 {% extends 'admin/base_admin.html' %}
+
 {% block title %}Admin Dashboard{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-12">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0"><i class="fas fa-user-md me-2"></i>All Doctor Appointments</h4>
-                </div>
-                <div class="card-body">
-                    <!-- Doctor Filter -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <label class="input-group-text" for="doctorFilter">
-                                    <i class="fas fa-filter me-2"></i>Show appointments for:
-                                </label>
-                                <select class="form-select" id="doctorFilter">
-                                    <option value="">All Doctors</option>
-                                    {% for doctor in doctors %}
-                                        <option value="{{ doctor.id }}" {% if selected_doctor_id == doctor.id|stringformat:"s" %}selected{% endif %}>
-                                            Dr. {{ doctor.get_full_name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            {% if selected_doctor_id %}
-                                <a href="{% url 'view_all_appointments' %}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-1"></i>Clear Filter
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <!-- Doctor statistics banner when filtered -->
-                    {% if selected_doctor_id and appointments %}
-                        {% with doctor=appointments.0.doctor %}
-                        <div class="alert alert-info mb-4">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-user-md fa-2x me-3"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-1">Dr. {{ doctor.get_full_name }}</h5>
-                                    <p class="mb-0">Showing {{ appointments|length }} appointment{{ appointments|length|pluralize }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endwith %}
-                    {% endif %}
-                    
-                    {% if appointments %}
-                    <div class="table-responsive">
-                        <table class="table table-hover bg-white rounded shadow-sm">
-                            <thead class="table-primary">
-                              <tr>
-                                <th>#</th>
-                                <th>Doctor</th>
-                                <th>Patient</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Reason</th>
-                                <th>Dr Findings</th>
-                                <th>Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {% for appointment in appointments %}
-                              <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>
-                                  <div class="fw-bold">Dr. {{ appointment.doctor.get_full_name }}</div>
-                                  <small class="text-muted">{{ appointment.doctor.username }}</small>
-                                </td>
-                                <td>
-                                  <div class="fw-bold">{{ appointment.patient.get_full_name }}</div>
-                                  <small class="text-muted">{{ appointment.patient.username }}</small>
-                                </td>
-                                <td>{{ appointment.appointment_date }}</td>
-                                <td>{{ appointment.appointment_time }}</td>
-                                <td>{{ appointment.reason }}</td>
-                                <td>{{ appointment.doctor_findings|default:"—" }}</td>
-                                <td>
-                                  <span class="badge 
-                                    {% if appointment.status == 'Pending' %} bg-warning text-dark
-                                    {% elif appointment.status == 'Approved' %} bg-success
-                                    {% elif appointment.status == 'Rejected' %} bg-danger
-                                    {% elif appointment.status == 'Consulted' %} bg-primary
-                                    {% else %} bg-secondary {% endif %}">
-                                    {{ appointment.status }}
-                                  </span>
-                                </td>
-                              </tr>
-                              {% empty %}
-                              <tr>
-                                <td colspan="8" class="text-center py-4">
-                                  <h5 class="text-muted">No appointments found.</h5>
-                                </td>
-                              </tr>
-                              {% endfor %}
-                            </tbody>
-                          </table>
-                          
-                    </div>
-                    {% else %}
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle me-2"></i>
-                        {% if selected_doctor_id %}
-                            No appointments found for this doctor.
-                        {% else %}
-                            No appointments found.
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+
+<style>
+
+    body{
+        background: #f4f7fb;
+    }
+
+    .dashboard-header{
+        background: linear-gradient(135deg,#dc3545,#b91c1c);
+        border-radius: 30px;
+        padding: 35px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(220,53,69,0.18);
+    }
+
+    .dashboard-header::before{
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        top: -100px;
+        right: -50px;
+    }
+
+    .dashboard-header::after{
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        bottom: -80px;
+        left: -60px;
+    }
+
+    .dashboard-header h2{
+        color: white;
+        font-weight: 800;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-header p{
+        color: rgba(255,255,255,0.85);
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .filter-card,
+    .table-card,
+    .info-card{
+        background: white;
+        border-radius: 28px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .filter-card,
+    .info-card{
+        padding: 25px;
+    }
+
+    .table-card{
+        padding: 22px;
+    }
+
+    .form-select{
+        height: 56px;
+        border-radius: 16px;
+        border: 1px solid #d0d5dd;
+        box-shadow: none !important;
+    }
+
+    .form-select:focus{
+        border-color: #dc3545;
+    }
+
+    .input-group-text{
+        border-radius: 16px 0 0 16px;
+        background: white;
+        border: 1px solid #d0d5dd;
+        font-weight: 600;
+    }
+
+    .clear-btn{
+        height: 56px;
+        border-radius: 16px;
+        font-weight: 700;
+        padding: 0 20px;
+    }
+
+    .doctor-info{
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .doctor-avatar{
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 28px;
+        box-shadow: 0 10px 25px rgba(220,53,69,0.2);
+    }
+
+    .doctor-info h5{
+        font-weight: 800;
+        margin-bottom: 5px;
+        color: #111827;
+    }
+
+    .doctor-info p{
+        margin: 0;
+        color: #667085;
+    }
+
+    .custom-table{
+        margin: 0;
+    }
+
+    .custom-table thead th{
+        background: #f8fafc;
+        border: none;
+        color: #344054;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 18px;
+        text-transform: uppercase;
+    }
+
+    .custom-table tbody tr{
+        border-bottom: 1px solid #f1f5f9;
+        transition: 0.3s ease;
+    }
+
+    .custom-table tbody tr:hover{
+        background: #fff5f5;
+    }
+
+    .custom-table tbody td{
+        padding: 18px;
+        border: none;
+        vertical-align: middle;
+        color: #475467;
+        font-weight: 500;
+    }
+
+    .user-box{
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .user-avatar{
+        width: 50px;
+        height: 50px;
+        border-radius: 16px;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(220,53,69,0.15);
+    }
+
+    .status-badge{
+        padding: 8px 15px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .status-pending{
+        background: rgba(245,158,11,0.12);
+        color: #d97706;
+    }
+
+    .status-approved{
+        background: rgba(34,197,94,0.12);
+        color: #16a34a;
+    }
+
+    .status-rejected{
+        background: rgba(239,68,68,0.12);
+        color: #dc2626;
+    }
+
+    .status-consulted{
+        background: rgba(59,130,246,0.12);
+        color: #2563eb;
+    }
+
+    .empty-state{
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .empty-state i{
+        font-size: 70px;
+        color: #cbd5e1;
+        margin-bottom: 18px;
+    }
+
+    .empty-state h4{
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .empty-state p{
+        color: #667085;
+    }
+
+    @media(max-width:768px){
+
+        .dashboard-header{
+            padding: 28px;
+            border-radius: 24px;
+        }
+
+        .dashboard-header h2{
+            font-size: 24px;
+        }
+
+        .filter-card,
+        .table-card,
+        .info-card{
+            border-radius: 22px;
+        }
+
+        .custom-table thead{
+            display: none;
+        }
+
+        .custom-table tbody tr{
+            display: block;
+            background: white;
+            margin-bottom: 18px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .custom-table tbody td{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .custom-table tbody td::before{
+            content: attr(data-label);
+            font-weight: 700;
+            color: #344054;
+        }
+
+    }
+
+</style>
+
+<div class="container-fluid px-2 px-md-4 py-4">
+
+    <!-- HEADER -->
+
+    <div class="dashboard-header mb-4">
+
+        <h2>
+            <i class="fas fa-user-md me-2"></i>
+            Doctor Appointments
+        </h2>
+
+        <p>
+            Monitor and manage all doctor appointments from the admin dashboard.
+        </p>
+
     </div>
+
+    <!-- FILTER -->
+
+    <div class="filter-card mb-4">
+
+        <div class="row g-3 align-items-center">
+
+            <div class="col-lg-6">
+
+                <div class="input-group">
+
+                    <span class="input-group-text">
+                        <i class="fas fa-filter"></i>
+                    </span>
+
+                    <select class="form-select" id="doctorFilter">
+
+                        <option value="">All Doctors</option>
+
+                        {% for doctor in doctors %}
+
+                        <option value="{{ doctor.id }}"
+                            {% if selected_doctor_id == doctor.id|stringformat:"s" %}selected{% endif %}>
+
+                            Dr. {{ doctor.get_full_name }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6 text-lg-end">
+
+                {% if selected_doctor_id %}
+
+                <a href="{% url 'view_all_appointments' %}" class="btn btn-outline-secondary clear-btn">
+                    <i class="fas fa-times me-2"></i>
+                    Clear Filter
+                </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTERED DOCTOR INFO -->
+
+    {% if selected_doctor_id and appointments %}
+
+    {% with doctor=appointments.0.doctor %}
+
+    <div class="info-card mb-4">
+
+        <div class="doctor-info">
+
+            <div class="doctor-avatar">
+                <i class="fas fa-user-md"></i>
+            </div>
+
+            <div>
+
+                <h5>
+                    Dr. {{ doctor.get_full_name }}
+                </h5>
+
+                <p>
+                    Showing {{ appointments|length }} appointment{{ appointments|length|pluralize }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endwith %}
+
+    {% endif %}
+
+    <!-- TABLE -->
+
+    {% if appointments %}
+
+    <div class="table-card">
+
+        <div class="table-responsive">
+
+            <table class="table custom-table align-middle">
+
+                <thead>
+
+                    <tr>
+                        <th>#</th>
+                        <th>Doctor</th>
+                        <th>Patient</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Reason</th>
+                        <th>Doctor Findings</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for appointment in appointments %}
+
+                    <tr>
+
+                        <td data-label="#">
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td data-label="Doctor">
+
+                            <div class="user-box">
+
+                                <div class="user-avatar">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+
+                                <div>
+
+                                    <div class="fw-bold text-dark">
+                                        Dr. {{ appointment.doctor.get_full_name }}
+                                    </div>
+
+                                    <small class="text-muted">
+                                        {{ appointment.doctor.username }}
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <td data-label="Patient">
+
+                            <div class="user-box">
+
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+
+                                <div>
+
+                                    <div class="fw-bold text-dark">
+                                        {{ appointment.patient.get_full_name }}
+                                    </div>
+
+                                    <small class="text-muted">
+                                        {{ appointment.patient.username }}
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <td data-label="Date">
+                            {{ appointment.appointment_date }}
+                        </td>
+
+                        <td data-label="Time">
+                            {{ appointment.appointment_time }}
+                        </td>
+
+                        <td data-label="Reason">
+                            {{ appointment.reason }}
+                        </td>
+
+                        <td data-label="Findings">
+                            {{ appointment.doctor_findings|default:"—" }}
+                        </td>
+
+                        <td data-label="Status">
+
+                            <span class="status-badge
+
+                                {% if appointment.status == 'Pending' %}
+                                    status-pending
+                                {% elif appointment.status == 'Approved' %}
+                                    status-approved
+                                {% elif appointment.status == 'Rejected' %}
+                                    status-rejected
+                                {% elif appointment.status == 'Consulted' %}
+                                    status-consulted
+                                {% endif %}
+
+                            ">
+
+                                {{ appointment.status }}
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="table-card">
+
+        <div class="empty-state">
+
+            <i class="fas fa-calendar-times"></i>
+
+            <h4>No Appointments Found</h4>
+
+            <p>
+
+                {% if selected_doctor_id %}
+                    No appointments found for this doctor.
+                {% else %}
+                    No appointments available right now.
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
 </div>
 
 {% block extra_js %}
+
 <script>
+
     document.addEventListener('DOMContentLoaded', function() {
+
         const doctorFilter = document.getElementById('doctorFilter');
-        
+
         doctorFilter.addEventListener('change', function() {
+
             const selectedDoctorId = this.value;
+
             let url = new URL(window.location.href);
-            
-            // Clear existing query parameters
+
             url.search = '';
-            
-            // Add doctor_id if selected
+
             if (selectedDoctorId) {
                 url.searchParams.set('doctor_id', selectedDoctorId);
             }
-            
-            // Navigate to the URL with the filter
+
             window.location.href = url.toString();
+
         });
+
     });
+
 </script>
+
 {% endblock %}
+
 {% endblock %}

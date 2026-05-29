@@ -1,63 +1,466 @@
 {% extends 'admin/base_admin.html' %}
+
 {% block title %}Admin Chat{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h3>Chat with Donors</h3>
 
-    <!-- New Message Form -->
-    <form method="post" class="mb-4">
-        {% csrf_token %}
-        <div class="row g-2">
-            <div class="col-md-4">
-                <select name="receiver" class="form-select">
-                    <option value="">Public Message</option>
-                    {% for user in receivers %}
-                        <option value="{{ user.id }}">{{ user.get_full_name }}</option>
+<style>
+
+    body{
+        background: #f4f7fb;
+    }
+
+    .chat-header{
+        background: linear-gradient(135deg,#dc3545,#b91c1c);
+        border-radius: 30px;
+        padding: 35px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(220,53,69,0.18);
+    }
+
+    .chat-header::before{
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        top: -100px;
+        right: -50px;
+    }
+
+    .chat-header::after{
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        bottom: -80px;
+        left: -60px;
+    }
+
+    .chat-header h2{
+        color: white;
+        font-weight: 800;
+        position: relative;
+        z-index: 2;
+        margin-bottom: 8px;
+    }
+
+    .chat-header p{
+        color: rgba(255,255,255,0.85);
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .chat-card{
+        background: white;
+        border-radius: 28px;
+        padding: 28px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .form-control,
+    .form-select{
+        height: 56px;
+        border-radius: 16px;
+        border: 1px solid #d0d5dd;
+        box-shadow: none !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus{
+        border-color: #dc3545;
+    }
+
+    .send-btn{
+        height: 56px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        color: white;
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .send-btn:hover{
+        transform: translateY(-3px);
+    }
+
+    .message-card{
+        background: white;
+        border-radius: 24px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        padding: 24px;
+        transition: 0.3s ease;
+    }
+
+    .message-card:hover{
+        transform: translateY(-4px);
+    }
+
+    .user-avatar{
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        background: linear-gradient(135deg,#dc3545,#ef4444);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 8px 20px rgba(220,53,69,0.2);
+        flex-shrink: 0;
+    }
+
+    .public-badge{
+        background: rgba(59,130,246,0.12);
+        color: #2563eb;
+        padding: 7px 14px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .message-text{
+        font-size: 15px;
+        color: #475467;
+        line-height: 1.7;
+        margin-top: 15px;
+        margin-bottom: 12px;
+    }
+
+    .message-time{
+        font-size: 13px;
+        color: #98a2b3;
+    }
+
+    .reply-box{
+        background: #f9fafb;
+        border-radius: 18px;
+        padding: 18px;
+        margin-top: 20px;
+    }
+
+    .reply-input{
+        height: 50px;
+        border-radius: 14px;
+    }
+
+    .reply-btn{
+        border: none;
+        border-radius: 14px;
+        background: rgba(220,53,69,0.12);
+        color: #dc3545;
+        font-weight: 700;
+        padding: 0 22px;
+        transition: 0.3s ease;
+    }
+
+    .reply-btn:hover{
+        background: #dc3545;
+        color: white;
+    }
+
+    .reply-item{
+        margin-top: 18px;
+        padding: 16px 18px;
+        border-left: 4px solid #dc3545;
+        background: #fff5f5;
+        border-radius: 14px;
+    }
+
+    .reply-item strong{
+        color: #111827;
+    }
+
+    .reply-item p{
+        margin: 8px 0;
+        color: #475467;
+    }
+
+    .empty-chat{
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .empty-chat i{
+        font-size: 70px;
+        color: #cbd5e1;
+    }
+
+    .empty-chat h4{
+        margin-top: 20px;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .empty-chat p{
+        color: #667085;
+    }
+
+    @media(max-width:768px){
+
+        .chat-header{
+            padding: 28px;
+            border-radius: 24px;
+        }
+
+        .chat-card,
+        .message-card{
+            border-radius: 22px;
+        }
+
+        .message-top{
+            flex-direction: column;
+            align-items: start !important;
+            gap: 15px;
+        }
+
+    }
+
+</style>
+
+<div class="container-fluid px-2 px-md-4 py-4">
+
+    <!-- HEADER -->
+
+    <div class="chat-header mb-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+            <div>
+
+                <h2>
+                    <i class="bi bi-chat-dots-fill me-2"></i>
+                    Admin Chat Panel
+                </h2>
+
+                <p>
+                    Connect with donors through public announcements and private messages.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SEND MESSAGE -->
+
+    <div class="chat-card mb-4">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="row g-3 align-items-center">
+
+                <div class="col-lg-4">
+
+                    <select name="receiver" class="form-select">
+
+                        <option value="">
+                            Public Message
+                        </option>
+
+                        {% for user in receivers %}
+
+                        <option value="{{ user.id }}">
+                            {{ user.get_full_name }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-lg-6">
+
+                    <input 
+                        type="text"
+                        name="message"
+                        class="form-control"
+                        placeholder="Start typing your message..."
+                        required
+                    >
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <button type="submit" class="btn send-btn w-100">
+
+                        <i class="bi bi-send-fill me-2"></i>
+                        Send
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- MESSAGE LIST -->
+
+    {% if messages %}
+
+        <div class="row g-4">
+
+            {% for msg in messages %}
+
+            <div class="col-12">
+
+                <div class="message-card">
+
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 message-top">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+
+                                    You
+
+                                    {% if msg.receiver %}
+
+                                    <span class="text-muted fw-normal">
+                                        →
+                                    </span>
+
+                                    <span class="text-danger">
+                                        {{ msg.receiver.get_full_name }}
+                                    </span>
+
+                                    {% else %}
+
+                                    <span class="public-badge ms-2">
+                                        Public
+                                    </span>
+
+                                    {% endif %}
+
+                                </h5>
+
+                                <small class="message-time">
+                                    {{ msg.timestamp|date:"M d, Y • h:i A" }}
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="message-text">
+
+                        {{ msg.message }}
+
+                    </div>
+
+                    <!-- REPLY FORM -->
+
+                    <div class="reply-box">
+
+                        <form method="post">
+
+                            {% csrf_token %}
+
+                            <input type="hidden" name="parent" value="{{ msg.id }}">
+
+                            <div class="input-group">
+
+                                <input 
+                                    type="text"
+                                    name="message"
+                                    class="form-control reply-input"
+                                    placeholder="Write a reply..."
+                                    required
+                                >
+
+                                <button class="reply-btn">
+
+                                    <i class="bi bi-reply-fill me-1"></i>
+                                    Reply
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- REPLIES -->
+
+                    {% for reply in msg.replies.all %}
+
+                    <div class="reply-item">
+
+                        <div class="d-flex justify-content-between flex-wrap gap-2">
+
+                            <strong>
+                                {{ reply.sender.get_full_name }}
+                            </strong>
+
+                            <small class="message-time">
+                                {{ reply.timestamp|date:"M d, Y • h:i A" }}
+                            </small>
+
+                        </div>
+
+                        <p class="mb-0">
+                            {{ reply.message }}
+                        </p>
+
+                    </div>
+
                     {% endfor %}
-                </select>
+
+                </div>
+
             </div>
-            <div class="col-md-6">
-                <input type="text" name="message" class="form-control" placeholder="Start a message...">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Send</button>
-            </div>
+
+            {% endfor %}
+
         </div>
-    </form>
 
-    <!-- Messages with Replies -->
-    {% for msg in messages %}
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-                <strong>You</strong>
-                {% if msg.receiver %}
-                    → <em>{{ msg.receiver.get_full_name }}</em>
-                {% else %}
-                    <span class="badge bg-info">Public</span>
-                {% endif %}
-                <p class="mt-2">{{ msg.message }}</p>
-                <small class="text-muted">{{ msg.timestamp|date:"M d, H:i" }}</small>
+    {% else %}
 
-                <!-- Reply -->
-                <form method="post" class="mt-3">
-                    {% csrf_token %}
-                    <input type="hidden" name="parent" value="{{ msg.id }}">
-                    <div class="input-group">
-                        <input type="text" name="message" class="form-control" placeholder="Reply...">
-                        <button class="btn btn-outline-secondary">Reply</button>
-                    </div>
-                </form>
+        <div class="chat-card">
 
-                <!-- Replies -->
-                {% for reply in msg.replies.all %}
-                    <div class="mt-3 ps-3 border-start">
-                        <strong>{{ reply.sender.get_full_name }}</strong>
-                        <p class="mb-1">{{ reply.message }}</p>
-                        <small class="text-muted">{{ reply.timestamp|date:"M d, H:i" }}</small>
-                    </div>
-                {% endfor %}
+            <div class="empty-chat">
+
+                <i class="bi bi-chat-square-dots"></i>
+
+                <h4>
+                    No Messages Yet
+                </h4>
+
+                <p>
+                    Start a conversation with donors using the chat panel above.
+                </p>
+
             </div>
+
         </div>
-    {% endfor %}
+
+    {% endif %}
+
 </div>
+
 {% endblock %}

@@ -94,294 +94,440 @@
 {% endblock %}
 
 {% block content %}
+
+<style>
+    .donor-page-title{
+        font-size: 2rem;
+        font-weight: 800;
+        color: #b91c1c;
+        margin-bottom: 0;
+    }
+
+    .modern-card{
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 10px 35px rgba(220, 38, 38, 0.08);
+    }
+
+    .filter-card{
+        border: none;
+        border-radius: 20px;
+        background: linear-gradient(135deg,#fff5f5,#ffffff);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.08);
+    }
+
+    .blood-filter-select{
+        height: 55px;
+        border-radius: 14px;
+        border: 1px solid #fecaca;
+        box-shadow: none !important;
+        font-weight: 600;
+    }
+
+    .blood-filter-select:focus{
+        border-color: #dc2626;
+    }
+
+    .input-group-text{
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 14px 0 0 14px !important;
+    }
+
+    .modern-table{
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    .modern-table thead{
+        background: linear-gradient(135deg,#b91c1c,#dc2626);
+    }
+
+    .modern-table thead th{
+        color: white;
+        font-size: 0.92rem;
+        font-weight: 700;
+        border: none;
+        padding: 18px 16px;
+        white-space: nowrap;
+    }
+
+    .modern-table tbody tr{
+        transition: 0.3s ease;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .modern-table tbody tr:hover{
+        background: #fff5f5;
+        transform: scale(1.002);
+    }
+
+    .modern-table tbody td{
+        padding: 18px 16px;
+        border: none;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .donor-avatar{
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #fee2e2;
+    }
+
+    .avatar-placeholder{
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,#dc2626,#ef4444);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .donor-name{
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .donor-username{
+        font-size: 0.82rem;
+        color: #9ca3af;
+    }
+
+    .blood-badge{
+        background: linear-gradient(135deg,#dc2626,#ef4444);
+        color: white;
+        border-radius: 30px;
+        padding: 9px 14px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    }
+
+    .email-text{
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    .phone-text{
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .date-chip{
+        background: #fef2f2;
+        color: #b91c1c;
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        display: inline-block;
+    }
+
+    .empty-state{
+        padding: 70px 20px;
+    }
+
+    .empty-state i{
+        font-size: 4rem;
+        color: #fca5a5;
+    }
+
+    .pagination .page-link{
+        border: none;
+        margin: 0 4px;
+        border-radius: 12px;
+        color: #b91c1c;
+        font-weight: 700;
+        padding: 10px 16px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    }
+
+    .pagination .page-item.active .page-link{
+        background: linear-gradient(135deg,#b91c1c,#dc2626);
+        color: white;
+    }
+
+    @media(max-width:768px){
+
+        .donor-page-title{
+            font-size: 1.5rem;
+        }
+
+        .modern-table thead th,
+        .modern-table tbody td{
+            white-space: nowrap;
+        }
+    }
+</style>
+
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-people-fill me-2 text-danger"></i>Available Donors</h2>
-  </div>
 
-  <!-- Filter/Search Section -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <form method="GET" class="row g-3" id="bloodFilterForm">
-        <div class="col-md-3">
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-droplet-fill text-danger"></i></span>
-            <select name="blood_group" class="form-select" id="bloodGroupSelect">
-              <option value="">All Blood Groups</option>
-              {% for bg in all_blood_groups %}
-                <option value="{{ bg }}" {% if request.GET.blood_group == bg %}selected{% endif %}>{{ bg }}</option>
-              {% endfor %}
-            </select>
-          </div>
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="donor-page-title">
+                <i class="bi bi-heart-pulse-fill me-2"></i>Available Donors
+            </h2>
+            <p class="text-muted mb-0">
+                Manage and explore all registered blood donors
+            </p>
         </div>
-      </form>
     </div>
-  </div>
 
-  <!-- Donor Table -->
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover bg-white rounded shadow-sm">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Blood Group</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Registered On</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for donor in donors %}
-              <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>
-                  <div class="d-flex align-items-center">
-                    {% if donor.profile_image %}
-                      <img src="{{ donor.profile_image.url }}" class="rounded-circle me-2" width="40" height="40" alt="{{ donor.get_full_name }}">
-                    {% else %}
-                      <div class="bg-secondary rounded-circle me-2 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
-                        <i class="bi bi-person-fill text-white"></i>
-                      </div>
-                    {% endif %}
-                    <div>
-                      <div class="fw-bold">{{ donor.get_full_name }}</div>
-                      <small class="text-muted">{{ donor.username }}</small>
+    <!-- FILTER SECTION -->
+    <div class="card filter-card mb-4">
+        <div class="card-body p-4">
+
+            <form method="GET" class="row g-3 align-items-center" id="bloodFilterForm">
+
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-semibold text-danger mb-2">
+                        Filter By Blood Group
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-droplet-fill"></i>
+                        </span>
+
+                        <select name="blood_group" class="form-select blood-filter-select" id="bloodGroupSelect">
+
+                            <option value="">All Blood Groups</option>
+
+                            {% for bg in all_blood_groups %}
+                                <option value="{{ bg }}" {% if request.GET.blood_group == bg %}selected{% endif %}>
+                                    {{ bg }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
                     </div>
-                  </div>
-                </td>
-                <td>
-                  {% if donor.blood_group %}
-                    <span class="badge bg-danger text-white">
-                      <i class="bi bi-droplet-fill me-1"></i>{{ donor.blood_group }}
-                    </span>
-                  {% else %}
-                    <span class="badge bg-secondary">Not specified</span>
-                  {% endif %}
-                </td>
-                <td>{{ donor.email }}</td>
-                <td>{{ donor.phone }}</td>
-                <td>{{ donor.date_joined|date:"M d, Y" }}</td>
-              </tr>
-            {% empty %}
-              <tr>
-                <td colspan="6" class="text-center py-5">
-                  <div class="d-flex flex-column align-items-center">
-                    <i class="bi bi-search fs-1 text-muted mb-3"></i>
-                    <h5>No donors found</h5>
-                    <p class="text-muted">Try changing the filter or search.</p>
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+                </div>
 
-      <!-- Pagination -->
-      {% if donors.has_other_pages %}
-        <nav aria-label="Page navigation" class="mt-3">
-          <ul class="pagination justify-content-center">
-            {% if donors.has_previous %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ donors.previous_page_number }}&{{ request.GET.urlencode|safe }}">Previous</a>
-              </li>
-            {% endif %}
+            </form>
 
-            {% for num in donors.paginator.page_range %}
-              {% if donors.number == num %}
-                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
-              {% elif num > donors.number|add:'-3' and num < donors.number|add:'3' %}
-                <li class="page-item"><a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode|safe }}">{{ num }}</a></li>
-              {% endif %}
-            {% endfor %}
-
-            {% if donors.has_next %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ donors.next_page_number }}&{{ request.GET.urlencode|safe }}">Next</a>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
-      {% endif %}
+        </div>
     </div>
-  </div>
+
+    <!-- DONOR TABLE -->
+    <div class="card modern-card">
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table modern-table">
+
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Donor Details</th>
+                            <th>Blood Group</th>
+                            <th>Email Address</th>
+                            <th>Phone Number</th>
+                            <th>Registered Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for donor in donors %}
+
+                        <tr>
+
+                            <td>
+                                <strong>#{{ forloop.counter }}</strong>
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    {% if donor.profile_image %}
+
+                                        <img src="{{ donor.profile_image.url }}"
+                                             class="donor-avatar"
+                                             alt="{{ donor.get_full_name }}">
+
+                                    {% else %}
+
+                                        <div class="avatar-placeholder">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+
+                                    {% endif %}
+
+                                    <div>
+                                        <div class="donor-name">
+                                            {{ donor.get_full_name }}
+                                        </div>
+
+                                        <div class="donor-username">
+                                            @{{ donor.username }}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                {% if donor.blood_group %}
+
+                                    <span class="blood-badge">
+                                        <i class="bi bi-droplet-fill me-1"></i>
+                                        {{ donor.blood_group }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+                                        Not Specified
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                <span class="email-text">
+                                    {{ donor.email }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="phone-text">
+                                    {{ donor.phone }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="date-chip">
+                                    {{ donor.date_joined|date:"M d, Y" }}
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="6">
+
+                                <div class="empty-state text-center">
+
+                                    <i class="bi bi-search-heart"></i>
+
+                                    <h4 class="mt-4 fw-bold">
+                                        No Donors Found
+                                    </h4>
+
+                                    <p class="text-muted mb-0">
+                                        Try changing the blood group filter.
+                                    </p>
+
+                                </div>
+
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- PAGINATION -->
+            {% if donors.has_other_pages %}
+
+            <div class="p-4">
+
+                <nav>
+
+                    <ul class="pagination justify-content-center mb-0">
+
+                        {% if donors.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ donors.previous_page_number }}&{{ request.GET.urlencode|safe }}">
+                               Previous
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in donors.paginator.page_range %}
+
+                            {% if donors.number == num %}
+
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">
+                                        {{ num }}
+                                    </a>
+                                </li>
+
+                            {% elif num > donors.number|add:'-3' and num < donors.number|add:'3' %}
+
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ num }}&{{ request.GET.urlencode|safe }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                        {% if donors.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ donors.next_page_number }}&{{ request.GET.urlencode|safe }}">
+                               Next
+                            </a>
+                        </li>
+                        {% endif %}
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
 </div>
 
-<!-- JavaScript to auto-submit the form -->
+<!-- AUTO SUBMIT FILTER -->
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const select = document.getElementById('bloodGroupSelect');
-    if (select) {
-      select.addEventListener('change', function () {
-        document.getElementById('bloodFilterForm').submit();
-      });
-    }
-  });
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const select = document.getElementById('bloodGroupSelect');
+
+        if (select) {
+
+            select.addEventListener('change', function () {
+                document.getElementById('bloodFilterForm').submit();
+            });
+
+        }
+
+    });
 </script>
 
-
-
-
-
-
-<!-- Change Password Modal -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <form method="post" action="{% url 'change_password' %}">
-        {% csrf_token %}
-        <div class="modal-content">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="old_password" class="form-label">Current Password</label>
-              <input type="password" class="form-control" name="old_password" id="old_password" required>
-            </div>
-            <div class="mb-3">
-              <label for="new_password" class="form-label">New Password</label>
-              <input type="password" class="form-control" name="new_password" id="new_password" required>
-              <!-- Real-time validation feedback will be inserted here by JavaScript -->
-            </div>
-            <div class="mb-3">
-              <label for="confirm_password" class="form-label">Confirm New Password</label>
-              <input type="password" class="form-control" name="confirm_password" id="confirm_password" required>
-              <!-- Match feedback will be inserted here by JavaScript -->
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-danger">Change Password</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const newPasswordInput = document.getElementById('new_password');
-      const confirmPasswordInput = document.getElementById('confirm_password');
-      const form = document.querySelector('#changePasswordModal form');
-      
-      // Create validation feedback container
-      const validationFeedback = document.createElement('div');
-      validationFeedback.className = 'password-validation-feedback mt-2';
-      newPasswordInput.parentNode.appendChild(validationFeedback);
-      
-      // Create validation criteria elements
-      const criteria = [
-        { id: 'length', text: 'At least 8 characters', regex: /.{8,}/ },
-        { id: 'uppercase', text: 'At least one uppercase letter', regex: /[A-Z]/ },
-        { id: 'lowercase', text: 'At least one lowercase letter', regex: /[a-z]/ },
-        { id: 'number', text: 'At least one number', regex: /[0-9]/ },
-        { id: 'special', text: 'At least one special character', regex: /[!@#$%^&*(),.?":{}|<>]/ }
-      ];
-      
-      // Create validation feedback UI
-      validationFeedback.innerHTML = '<div class="small">Password requirements:</div>';
-      const criteriaList = document.createElement('ul');
-      criteriaList.className = 'list-unstyled small ms-3';
-      
-      criteria.forEach(criterion => {
-        const item = document.createElement('li');
-        item.id = `criterion-${criterion.id}`;
-        item.innerHTML = `<i class="bi bi-x-circle text-danger"></i> ${criterion.text}`;
-        criteriaList.appendChild(item);
-      });
-      
-      validationFeedback.appendChild(criteriaList);
-      
-      // Match confirmation feedback
-      const matchFeedback = document.createElement('div');
-      matchFeedback.className = 'match-feedback small mt-2 d-none';
-      matchFeedback.innerHTML = '<i class="bi bi-x-circle text-danger"></i> Passwords do not match';
-      confirmPasswordInput.parentNode.appendChild(matchFeedback);
-      
-      // Real-time validation as user types
-      newPasswordInput.addEventListener('input', function() {
-        validatePassword();
-      });
-      
-      // Check if passwords match in real-time
-      confirmPasswordInput.addEventListener('input', function() {
-        validatePasswordMatch();
-      });
-      
-      newPasswordInput.addEventListener('input', function() {
-        if (confirmPasswordInput.value !== '') {
-          validatePasswordMatch();
-        }
-      });
-      
-      // Form submission validation
-      form.addEventListener('submit', function(event) {
-        const isValid = validatePassword();
-        const passwordsMatch = validatePasswordMatch();
-        
-        if (!isValid || !passwordsMatch) {
-          event.preventDefault();
-        }
-      });
-    
-      function validatePassword() {
-        const password = newPasswordInput.value;
-        let allValid = true;
-        
-        // Check each criterion
-        criteria.forEach(criterion => {
-          const criterionElement = document.getElementById(`criterion-${criterion.id}`);
-          const isValid = criterion.regex.test(password);
-          
-          if (isValid) {
-            criterionElement.innerHTML = `<i class="bi bi-check-circle text-success"></i> ${criterion.text}`;
-          } else {
-            criterionElement.innerHTML = `<i class="bi bi-x-circle text-danger"></i> ${criterion.text}`;
-            allValid = false;
-          }
-        });
-        
-        // Update input visual state
-        if (allValid) {
-          newPasswordInput.classList.remove('is-invalid');
-          newPasswordInput.classList.add('is-valid');
-        } else {
-          newPasswordInput.classList.remove('is-valid');
-          newPasswordInput.classList.add('is-invalid');
-        }
-        
-        return allValid;
-      }
-      
-      function validatePasswordMatch() {
-        const match = newPasswordInput.value === confirmPasswordInput.value;
-        
-        if (confirmPasswordInput.value === '') {
-          matchFeedback.classList.add('d-none');
-          confirmPasswordInput.classList.remove('is-valid');
-          confirmPasswordInput.classList.remove('is-invalid');
-          return false;
-        }
-        
-        matchFeedback.classList.remove('d-none');
-        
-        if (match) {
-          matchFeedback.innerHTML = '<i class="bi bi-check-circle text-success"></i> Passwords match';
-          confirmPasswordInput.classList.remove('is-invalid');
-          confirmPasswordInput.classList.add('is-valid');
-        } else {
-          matchFeedback.innerHTML = '<i class="bi bi-x-circle text-danger"></i> Passwords do not match';
-          confirmPasswordInput.classList.remove('is-valid');
-          confirmPasswordInput.classList.add('is-invalid');
-        }
-        
-        return match;
-      }
-    });
-  </script>
-  <!-- Make sure to include Bootstrap Icons in your page -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 {% endblock %}

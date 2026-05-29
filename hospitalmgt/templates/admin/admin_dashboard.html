@@ -3,7 +3,7 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <style>
@@ -40,141 +40,1326 @@
         }
     }
 
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
     .animate-header {
-        animation: fadeInDown 0.6s ease-out;
+        animation: fadeInDown 0.8s ease-out;
     }
 
     .animate-card {
-        animation: scaleIn 0.5s ease-out backwards;
+        animation: scaleIn 0.6s ease-out backwards;
     }
 
     .animate-card:nth-child(1) { animation-delay: 0.1s; }
     .animate-card:nth-child(2) { animation-delay: 0.2s; }
     .animate-card:nth-child(3) { animation-delay: 0.3s; }
     .animate-card:nth-child(4) { animation-delay: 0.4s; }
+    .animate-card:nth-child(5) { animation-delay: 0.5s; }
+    .animate-card:nth-child(6) { animation-delay: 0.6s; }
 
     .animate-secondary {
-        animation: fadeInUp 0.6s ease-out backwards;
+        animation: fadeInUp 0.7s ease-out backwards;
     }
 
     .animate-secondary:nth-child(1) { animation-delay: 0.5s; }
     .animate-secondary:nth-child(2) { animation-delay: 0.6s; }
     .animate-secondary:nth-child(3) { animation-delay: 0.7s; }
 
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    .animate-chart {
+        animation: slideInLeft 0.8s ease-out backwards;
     }
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    .animate-chart:nth-child(1) { animation-delay: 0.8s; }
+    .animate-chart:nth-child(2) { animation-delay: 0.9s; }
+    .animate-chart:nth-child(3) { animation-delay: 1s; }
+    .animate-chart:nth-child(4) { animation-delay: 1.1s; }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-banner::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: pulse 3s ease-in-out infinite;
+    }
+
+    .welcome-banner h2 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-banner p {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-banner .date-time {
+        margin-top: 15px;
+        font-size: 0.95rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        border: none;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 12px 35px rgba(220, 53, 69, 0.2);
+    }
+
+    .stat-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    .stat-icon::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 15px;
+        background: inherit;
+        opacity: 0.3;
+        filter: blur(15px);
+    }
+
+    .stat-icon.bg-red {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+        color: white;
+    }
+
+    .stat-icon.bg-blue {
+        background: linear-gradient(135deg, #4e73df, #224abe);
+        color: white;
+    }
+
+    .stat-icon.bg-green {
+        background: linear-gradient(135deg, #1cc88a, #13855c);
+        color: white;
+    }
+
+    .stat-icon.bg-orange {
+        background: linear-gradient(135deg, #f6c23e, #dda20a);
+        color: white;
+    }
+
+    .stat-icon.bg-purple {
+        background: linear-gradient(135deg, #6f42c1, #5a32a3);
+        color: white;
+    }
+
+    .stat-icon.bg-info {
+        background: linear-gradient(135deg, #36b9cc, #258391);
+        color: white;
+    }
+
+    .stat-card h3 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+
+    .stat-card p {
+        color: #6c757d;
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .stat-card .badge {
+        margin-top: 12px;
+        padding: 8px 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 20px;
+    }
+
+    .stat-card .stat-details {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .stat-card .stat-detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .stat-card .stat-detail-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .stat-card .stat-detail-label {
+        color: #6c757d;
+    }
+
+    .stat-card .stat-detail-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 18px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        border: none;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(220, 53, 69, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(50%, 50%);
+        transition: all 0.4s ease;
+    }
+
+    .action-card:hover::after {
+        transform: translate(30%, 30%);
+        background: radial-gradient(circle, rgba(220, 53, 69, 0.12) 0%, transparent 70%);
+    }
+
+    .action-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(220, 53, 69, 0.15);
+    }
+
+    .action-card h5 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .action-card p {
+        color: #6c757d;
+        margin-bottom: 20px;
+        line-height: 1.6;
+        position: relative;
+        z-index: 1;
+    }
+
+    .action-card .btn {
+        border-radius: 12px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid;
+        position: relative;
+        z-index: 1;
+    }
+
+    .action-card .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .chart-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        transform: translateY(-3px);
+    }
+
+    .chart-card h5 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    /* Recent Activity Styles */
+    .activity-card {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        height: 100%;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: start;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+
+    .activity-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .activity-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-content h6 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+
+    .activity-content p {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+        color: #999;
+        white-space: nowrap;
+    }
+
+    /* Quick Stats Table */
+    .quick-stats-table {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .quick-stats-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .quick-stats-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .quick-stats-table .label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .quick-stats-table .value {
+        text-align: right;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.95rem;
+    }
+
+    /* Alerts Section */
+    .alert-item {
+        background: white;
+        border-left: 4px solid;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+
+    .alert-item:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transform: translateX(5px);
+    }
+
+    .alert-item.alert-urgent {
+        border-left-color: #dc3545;
+        background: linear-gradient(to right, rgba(220, 53, 69, 0.05), white);
+    }
+
+    .alert-item.alert-warning {
+        border-left-color: #f6c23e;
+        background: linear-gradient(to right, rgba(246, 194, 62, 0.05), white);
+    }
+
+    .alert-item.alert-info {
+        border-left-color: #36b9cc;
+        background: linear-gradient(to right, rgba(54, 185, 204, 0.05), white);
+    }
+
+    .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .alert-title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.95rem;
+    }
+
+    .alert-badge {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .alert-message {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .welcome-banner {
+            padding: 25px;
+        }
+
+        .welcome-banner h2 {
+            font-size: 1.6rem;
+        }
+
+        .welcome-banner p {
+            font-size: 0.95rem;
+        }
+
+        .stat-card {
+            padding: 20px;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.6rem;
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+        }
+
+        .chart-container {
+            height: 250px;
+        }
+
+        .activity-item {
+            flex-direction: column;
+        }
+
+        .activity-time {
+            margin-top: 8px;
+        }
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 40px 0 25px;
+        padding-left: 15px;
+        border-left: 4px solid #dc3545;
+    }
+
+    /* Progress Bar Styles */
+    .progress-item {
+        margin-bottom: 20px;
+    }
+
+    .progress-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .progress-label-text {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .progress-label-value {
+        color: #6c757d;
+    }
+
+    .progress {
+        height: 10px;
+        border-radius: 10px;
+        background: #f0f0f0;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 1s ease;
     }
 </style>
 
 <div class="container-fluid">
 
-    <div class="animate-header">
-        <h2 class="mb-4 fw-bold text-primary">Welcome, Admin </h2>
-        <p class="text-muted">Manage users, doctors, donors, patients, reports, and system settings all in one place.</p>
-    </div>
-
-    <div class="row g-4 mt-3">
-        <!-- Users Card -->
-        <div class="col-md-6 col-lg-3 animate-card">
-            <div class="card text-white bg-primary shadow rounded-4 h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="me-3">
-                        <i class="fas fa-users fa-2x"></i>
-                    </div>
-                    <div>
-                        <h5 class="card-title mb-0">Manage Users</h5>
-                        <small class="text-white-50">Add, edit, remove users</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Doctors Card -->
-        <div class="col-md-6 col-lg-3 animate-card">
-            <div class="card text-white bg-success shadow rounded-4 h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="me-3">
-                        <i class="fas fa-user-md fa-2x"></i>
-                    </div>
-                    <div>
-                        <h5 class="card-title mb-0">Doctors</h5>
-                        <small class="text-white-50">View & manage doctors</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Donors Card -->
-        <div class="col-md-6 col-lg-3 animate-card">
-            <div class="card text-white bg-danger shadow rounded-4 h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="me-3">
-                        <i class="fas fa-hand-holding-heart fa-2x"></i>
-                    </div>
-                    <div>
-                        <h5 class="card-title mb-0">Donors</h5>
-                        <small class="text-white-50">Manage donor profiles</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Patients Card -->
-        <div class="col-md-6 col-lg-3 animate-card">
-            <div class="card text-white bg-warning shadow rounded-4 h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="me-3">
-                        <i class="fas fa-procedures fa-2x"></i>
-                    </div>
-                    <div>
-                        <h5 class="card-title mb-0">Patients</h5>
-                        <small class="text-white-50">Access patient records</small>
-                    </div>
-                </div>
-            </div>
+    <!-- Welcome Banner -->
+    <div class="welcome-banner animate-header">
+        <h2><i class="fas fa-hand-sparkles me-2"></i>Welcome Back, Admin!</h2>
+        <p>Manage the blood bank system efficiently. Monitor donors, patients, requests, and analytics from your centralized dashboard.</p>
+        <div class="date-time">
+            <i class="fas fa-calendar-alt me-2"></i><span id="currentDate"></span>
+            <i class="fas fa-clock ms-3 me-2"></i><span id="currentTime"></span>
         </div>
     </div>
 
-    <!-- Second Row -->
-    <div class="row g-4 mt-3">
-        <!-- Reports Card -->
-        <div class="col-md-6 col-lg-4 animate-secondary">
-            <div class="card border-0 shadow rounded-4 h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-chart-line me-2 text-primary"></i> Reports</h5>
-                    <p class="card-text">Generate system and health-related reports.</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm">View Reports</a>
+    <!-- Statistics Cards Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-red">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <h3 class="mb-1">245</h3>
+                <p class="text-muted">Active Donors</p>
+                <span class="badge bg-success"><i class="fas fa-arrow-up me-1"></i>12% increase</span>
+                <div class="stat-details">
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">This Month</span>
+                        <span class="stat-detail-value">+28</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Verified</span>
+                        <span class="stat-detail-value">238</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Settings Card -->
-        <div class="col-md-6 col-lg-4 animate-secondary">
-            <div class="card border-0 shadow rounded-4 h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-cogs me-2 text-dark"></i> Settings</h5>
-                    <p class="card-text">Configure system settings and preferences.</p>
-                    <a href="#" class="btn btn-outline-dark btn-sm">Go to Settings</a>
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-blue">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h3 class="mb-1">48</h3>
+                <p class="text-muted">Total Doctors</p>
+                <span class="badge bg-info text-white"><i class="fas fa-check me-1"></i>All Active</span>
+                <div class="stat-details">
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">On Duty</span>
+                        <span class="stat-detail-value">32</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Available</span>
+                        <span class="stat-detail-value">16</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Notifications -->
-        <div class="col-md-6 col-lg-4 animate-secondary">
-            <div class="card border-0 shadow rounded-4 h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-bell me-2 text-danger"></i> Notifications</h5>
-                    <p class="card-text">Check pending approvals and messages.</p>
-                    <a href="#" class="btn btn-outline-danger btn-sm">View Alerts</a>
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-green">
+                    <i class="fas fa-procedures"></i>
                 </div>
+                <h3 class="mb-1">182</h3>
+                <p class="text-muted">Total Patients</p>
+                <span class="badge bg-primary"><i class="fas fa-user-plus me-1"></i>5 New Today</span>
+                <div class="stat-details">
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">In Treatment</span>
+                        <span class="stat-detail-value">45</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Discharged</span>
+                        <span class="stat-detail-value">137</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-orange">
+                    <i class="fas fa-tint"></i>
+                </div>
+                <h3 class="mb-1">23</h3>
+                <p class="text-muted">Pending Requests</p>
+                <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Urgent</span>
+                <div class="stat-details">
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Critical</span>
+                        <span class="stat-detail-value text-danger">8</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Today</span>
+                        <span class="stat-detail-value">12</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-purple">
+                    <i class="fas fa-vial"></i>
+                </div>
+                <h3 class="mb-1">1,460</h3>
+                <p class="text-muted">Total Blood Units</p>
+                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Good Stock</span>
+                <div class="stat-details">
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Critical Low</span>
+                        <span class="stat-detail-value text-danger">2</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Adequate</span>
+                        <span class="stat-detail-value">6</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3 class="mb-1">92</h3>
+                <p class="text-muted">Donations (Month)</p>
+                <span class="badge bg-success"><i class="fas fa-arrow-up me-1"></i>8% up</span>
+                <div class="stat-details">
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">This Week</span>
+                        <span class="stat-detail-value">22</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Today</span>
+                        <span class="stat-detail-value">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Action Cards and System Alerts -->
+    <div class="row g-4 mb-4">
+        <!-- Action Cards -->
+        <div class="col-lg-8">
+            <div class="row g-4">
+                <div class="col-md-6 animate-secondary">
+                    <div class="action-card">
+                        <h5>
+                            <i class="fas fa-chart-line text-primary"></i>
+                            Reports & Analytics
+                        </h5>
+                        <p>Generate comprehensive reports on blood inventory, donation trends, and system performance metrics.</p>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-file-medical-alt me-2"></i>View Reports
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 animate-secondary">
+                    <div class="action-card">
+                        <h5>
+                            <i class="fas fa-cog text-dark"></i>
+                            System Settings
+                        </h5>
+                        <p>Configure system preferences, user permissions, and notification settings for optimal operation.</p>
+                        <a href="#" class="btn btn-outline-dark">
+                            <i class="fas fa-sliders-h me-2"></i>Configure
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 animate-secondary">
+                    <div class="action-card">
+                        <h5>
+                            <i class="fas fa-bell text-danger"></i>
+                            Notifications Center
+                        </h5>
+                        <p>View pending approvals, urgent blood requests, and important system alerts requiring immediate attention.</p>
+                        <a href="#" class="btn btn-outline-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>View Alerts
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 animate-secondary">
+                    <div class="action-card">
+                        <h5>
+                            <i class="fas fa-users text-success"></i>
+                            User Management
+                        </h5>
+                        <p>Manage donor and patient accounts, verify registrations, and handle user permissions and roles.</p>
+                        <a href="#" class="btn btn-outline-success">
+                            <i class="fas fa-user-cog me-2"></i>Manage Users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Alerts -->
+        <div class="col-lg-4 animate-secondary">
+            <div class="activity-card">
+                <h5 class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    System Alerts
+                </h5>
+                
+                <div class="alert-item alert-urgent">
+                    <div class="alert-header">
+                        <span class="alert-title">Critical Blood Stock</span>
+                        <span class="alert-badge badge bg-danger">Urgent</span>
+                    </div>
+                    <p class="alert-message">AB- blood type below critical threshold (75 units)</p>
+                </div>
+
+                <div class="alert-item alert-urgent">
+                    <div class="alert-header">
+                        <span class="alert-title">Emergency Request</span>
+                        <span class="alert-badge badge bg-danger">Urgent</span>
+                    </div>
+                    <p class="alert-message">O- blood needed for emergency surgery - 8 units</p>
+                </div>
+
+                <div class="alert-item alert-warning">
+                    <div class="alert-header">
+                        <span class="alert-title">Stock Warning</span>
+                        <span class="alert-badge badge bg-warning text-dark">Warning</span>
+                    </div>
+                    <p class="alert-message">B- blood inventory running low (95 units remaining)</p>
+                </div>
+
+                <div class="alert-item alert-info">
+                    <div class="alert-header">
+                        <span class="alert-title">Pending Approvals</span>
+                        <span class="alert-badge badge bg-info text-white">Info</span>
+                    </div>
+                    <p class="alert-message">12 donor registrations awaiting verification</p>
+                </div>
+
+                <div class="alert-item alert-info">
+                    <div class="alert-header">
+                        <span class="alert-title">Expiring Soon</span>
+                        <span class="alert-badge badge bg-info text-white">Info</span>
+                    </div>
+                    <p class="alert-message">18 blood units expiring within 7 days</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Section Title -->
+    <h3 class="section-title"><i class="fas fa-chart-pie me-2"></i>Analytics & Insights</h3>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Blood Type Distribution Chart -->
+        <div class="col-lg-6 animate-chart">
+            <div class="chart-card">
+                <h5><i class="fas fa-tint text-danger me-2"></i>Blood Type Distribution</h5>
+                <div class="chart-container">
+                    <canvas id="bloodTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Donations Trend -->
+        <div class="col-lg-6 animate-chart">
+            <div class="chart-card">
+                <h5><i class="fas fa-chart-line text-primary me-2"></i>Monthly Donations Trend</h5>
+                <div class="chart-container">
+                    <canvas id="donationTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Blood Stock Status -->
+        <div class="col-lg-6 animate-chart">
+            <div class="chart-card">
+                <h5><i class="fas fa-flask text-success me-2"></i>Blood Stock Status (Units)</h5>
+                <div class="chart-container">
+                    <canvas id="bloodStockChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Status Overview -->
+        <div class="col-lg-6 animate-chart">
+            <div class="chart-card">
+                <h5><i class="fas fa-clipboard-list text-warning me-2"></i>Request Status Overview</h5>
+                <div class="chart-container">
+                    <canvas id="requestStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and Blood Bank Performance -->
+    <div class="row g-4 mb-4">
+        <!-- Recent Activity -->
+        <div class="col-lg-6">
+            <div class="activity-card">
+                <h5 class="mb-4">
+                    <i class="fas fa-history text-primary me-2"></i>
+                    Recent Activity
+                </h5>
+                
+                <div class="activity-item">
+                    <div class="activity-icon bg-success text-white">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>Blood Request Approved</h6>
+                        <p>Request #BR-2024-1245 for 3 units of A+ approved for Patient John Doe</p>
+                    </div>
+                    <div class="activity-time">
+                        <i class="fas fa-clock me-1"></i>5 mins ago
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon bg-primary text-white">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>New Donor Registration</h6>
+                        <p>Sarah Johnson registered as a new donor (Blood Type: O+)</p>
+                    </div>
+                    <div class="activity-time">
+                        <i class="fas fa-clock me-1"></i>18 mins ago
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon bg-info text-white">
+                        <i class="fas fa-syringe"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>Donation Completed</h6>
+                        <p>Michael Brown donated 450ml of B+ blood - Added to inventory</p>
+                    </div>
+                    <div class="activity-time">
+                        <i class="fas fa-clock me-1"></i>1 hour ago
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon bg-warning text-white">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>Low Stock Alert</h6>
+                        <p>AB- blood inventory dropped below 100 units threshold</p>
+                    </div>
+                    <div class="activity-time">
+                        <i class="fas fa-clock me-1"></i>2 hours ago
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon bg-danger text-white">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>Emergency Request</h6>
+                        <p>Emergency request for 5 units of O- processed and delivered</p>
+                    </div>
+                    <div class="activity-time">
+                        <i class="fas fa-clock me-1"></i>3 hours ago
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon bg-secondary text-white">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>Doctor Verified</h6>
+                        <p>Dr. Emily Davis account verified and activated</p>
+                    </div>
+                    <div class="activity-time">
+                        <i class="fas fa-clock me-1"></i>5 hours ago
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blood Bank Performance -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5>
+                    <i class="fas fa-trophy text-warning me-2"></i>
+                    Blood Bank Performance
+                </h5>
+                
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span class="progress-label-text">
+                            <i class="fas fa-bullseye me-2 text-primary"></i>Monthly Donation Goal
+                        </span>
+                        <span class="progress-label-value">92 / 100 units</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" data-target="92"></div>
+                    </div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span class="progress-label-text">
+                            <i class="fas fa-users me-2 text-success"></i>Donor Retention Rate
+                        </span>
+                        <span class="progress-label-value">85%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 0%" data-target="85"></div>
+                    </div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span class="progress-label-text">
+                            <i class="fas fa-clock me-2 text-warning"></i>Average Response Time
+                        </span>
+                        <span class="progress-label-value">15 mins (Target: 20 mins)</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" data-target="75"></div>
+                    </div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span class="progress-label-text">
+                            <i class="fas fa-check-circle me-2 text-info"></i>Request Fulfillment Rate
+                        </span>
+                        <span class="progress-label-value">96%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 0%" data-target="96"></div>
+                    </div>
+                </div>
+
+                <table class="quick-stats-table mt-4">
+                    <tr>
+                        <td class="label"><i class="fas fa-calendar-check me-2 text-primary"></i>Scheduled Donations</td>
+                        <td class="value">34</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><i class="fas fa-truck-medical me-2 text-success"></i>Blood Units Dispatched</td>
+                        <td class="value">287 (This Month)</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><i class="fas fa-hospital me-2 text-info"></i>Partner Hospitals</td>
+                        <td class="value">12 Active</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><i class="fas fa-user-shield me-2 text-warning"></i>Blood Screened</td>
+                        <td class="value">100% Compliance</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><i class="fas fa-star me-2 text-danger"></i>Customer Satisfaction</td>
+                        <td class="value">4.8 / 5.0</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
 
 </div>
+
+<script>
+    // Update Date and Time
+    function updateDateTime() {
+        const now = new Date();
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+    }
+    
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Counter animation for statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        const counters = document.querySelectorAll('.stat-card h3');
+        
+        counters.forEach(counter => {
+            const target = parseInt(counter.textContent.replace(/,/g, ''));
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+            
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    counter.textContent = Math.floor(current).toLocaleString();
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = target.toLocaleString();
+                }
+            };
+            
+            updateCounter();
+        });
+
+        // Animate progress bars
+        setTimeout(() => {
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                const target = bar.getAttribute('data-target');
+                bar.style.width = target + '%';
+            });
+        }, 500);
+
+        // Chart 1: Blood Type Distribution (Pie Chart)
+        const bloodTypeCtx = document.getElementById('bloodTypeChart').getContext('2d');
+        new Chart(bloodTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'],
+                datasets: [{
+                    label: 'Donors',
+                    data: [85, 62, 48, 23, 15, 12, 8, 5],
+                    backgroundColor: [
+                        '#dc3545',
+                        '#ff6b6b',
+                        '#4e73df',
+                        '#1cc88a',
+                        '#f6c23e',
+                        '#e74a3b',
+                        '#36b9cc',
+                        '#858796'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + ' donors';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Monthly Donations Trend (Line Chart)
+        const donationTrendCtx = document.getElementById('donationTrendChart').getContext('2d');
+        new Chart(donationTrendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Donations',
+                    data: [45, 52, 48, 65, 72, 68, 75, 82, 78, 88, 85, 92],
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#dc3545',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: Blood Stock Status (Bar Chart)
+        const bloodStockCtx = document.getElementById('bloodStockChart').getContext('2d');
+        new Chart(bloodStockCtx, {
+            type: 'bar',
+            data: {
+                labels: ['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'],
+                datasets: [{
+                    label: 'Units Available',
+                    data: [320, 280, 245, 180, 145, 120, 95, 75],
+                    backgroundColor: [
+                        '#1cc88a',
+                        '#1cc88a',
+                        '#f6c23e',
+                        '#f6c23e',
+                        '#dc3545',
+                        '#dc3545',
+                        '#dc3545',
+                        '#858796'
+                    ],
+                    borderRadius: 8,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 4: Request Status Overview (Polar Area Chart)
+        const requestStatusCtx = document.getElementById('requestStatusChart').getContext('2d');
+        new Chart(requestStatusCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['Completed', 'Pending', 'In Progress', 'Cancelled', 'Urgent'],
+                datasets: [{
+                    label: 'Requests',
+                    data: [145, 23, 42, 15, 8],
+                    backgroundColor: [
+                        'rgba(28, 200, 138, 0.7)',
+                        'rgba(246, 194, 62, 0.7)',
+                        'rgba(78, 115, 223, 0.7)',
+                        'rgba(133, 135, 150, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12
+                    }
+                },
+                scales: {
+                    r: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
 {% endblock %}
